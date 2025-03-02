@@ -237,11 +237,6 @@
         margin-top: 10px;
         display: none;
     }
-
-    .ifkIDLY.model-header {
-        background-color: #0000FF; /* رنگ آبی */
-    }
-
 </style>
 </head>
 <body>
@@ -519,6 +514,20 @@
     <button class="cancelButton" onclick="hideInput()">Cancel</button>
     <div id="errorMessage" class="errorMessage" style="direction: rtl;">⚠ خطا: عدد نامعتبر!</div>
   </div>
+
+    <script>
+        // بررسی کنید که آیا شیء Telegram.WebApp موجود است
+        if (window.Telegram && window.Telegram.WebApp) {
+            // تنظیم رنگ سربرگ
+            window.Telegram.WebApp.headerColor = "#ff0000"; // رنگ قرمز
+
+            // تنظیم رنگ پس‌زمینه
+            window.Telegram.WebApp.backgroundColor = "#00ff00"; // رنگ سبز
+
+            // تنظیم رنگ نوار پایین
+            window.Telegram.WebApp.bottomBarColor = "#0000ff"; // رنگ آبی
+        }
+    </script>
   
   <script>
     // دریافت دکمه اسکرول و دکمه جستجو از HTML
