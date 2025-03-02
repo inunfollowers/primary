@@ -13,14 +13,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
 
-<script>
-  window.onload = function() {
-    // تنظیم رنگ ثابت برای نوار بالای مینی اپ تلگرام
-    if (Telegram && Telegram.WebApp) {
-      Telegram.WebApp.backgroundColor = '#ff8fab';
-    }
-  };
-</script>
+    <script>
+        // کدهای جاوا اسکریپت برای تغییر رنگ هدر و پس‌زمینه
+        Telegram.WebApp.setHeaderColor('secondary_bg_color');
+        Telegram.WebApp.setBackgroundColor('#ff8fab');
+    </script>
   
   <style>
     body {
