@@ -12,6 +12,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+
+<script>
+  window.onload = function() {
+    // تنظیم رنگ ثابت برای نوار بالای مینی اپ تلگرام
+    if (Telegram && Telegram.WebApp) {
+      Telegram.WebApp.backgroundColor = '#ff8fab';
+    }
+  };
+</script>
+  
   <style>
     body {
     background-color: #FF8FAB;
@@ -513,15 +523,6 @@
     <button class="cancelButton" onclick="hideInput()">Cancel</button>
     <div id="errorMessage" class="errorMessage" style="direction: rtl;">⚠ خطا: عدد نامعتبر!</div>
   </div>
-
-<script>
-  window.onload = function() {
-    // تنظیم رنگ ثابت برای نوار بالای مینی اپ تلگرام
-    if (Telegram && Telegram.WebApp) {
-      Telegram.WebApp.backgroundColor = '#FF8FAB';
-    }
-  };
-</script>
   
   <script>
     // دریافت دکمه اسکرول و دکمه جستجو از HTML
