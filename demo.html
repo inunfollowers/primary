@@ -518,6 +518,9 @@
     <script>
         // بررسی کنید که آیا شیء Telegram.WebApp موجود است
         if (window.Telegram && window.Telegram.WebApp) {
+            // آماده کردن وب اپلیکیشن تلگرام
+            window.Telegram.WebApp.ready();
+
             // تنظیم رنگ سربرگ
             window.Telegram.WebApp.headerColor = "#ff0000"; // رنگ قرمز
 
