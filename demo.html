@@ -516,17 +516,9 @@
 
 <script>
   window.onload = function() {
-    // 1. پیدا کردن متاتگ theme-color
-    var metaThemeColor = document.querySelector('meta[name="theme-color"]');
-
-    // 2. بررسی وجود متاتگ و دریافت مقدار رنگ
-    if (metaThemeColor) {
-      var metaColor = metaThemeColor.getAttribute('content');
-
-      // 3. اعمال رنگ به نوار بالای مینی اپ تلگرام
-      if (Telegram && Telegram.WebApp) {
-        Telegram.WebApp.backgroundColor = metaColor;
-      }
+    // تنظیم رنگ ثابت برای نوار بالای مینی اپ تلگرام
+    if (Telegram && Telegram.WebApp) {
+      Telegram.WebApp.backgroundColor = '#FF8FAB';
     }
   };
 </script>
