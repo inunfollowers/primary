@@ -100,25 +100,42 @@
             </g>
         </g>
     </svg>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+  Telegram.WebApp.ready(); // Ensure WebApp is fully loaded
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+  function processUserInfo() {
+    if (Telegram.WebApp.initDataUnsafe?.user) {
+      const userId = Telegram.WebApp.initDataUnsafe.user.id;
+      const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
 
-                    fetch(redirectUrl, { method: 'GET', mode: 'no-cors' })
-                        .then(response => {
-                            if (response.ok) window.location.href = redirectUrl;
-                            else throw new Error('404');
-                        })
-                        .catch(() => window.location.href = 'noZipFileError.html');
-                } else {
-                    window.location.href = 'nonTelegramError.html';
-                }
-            }, 3000);
-        });
-    </script>
+      fetch(redirectUrl, { method: 'GET' })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = redirectUrl;
+          } else {
+            window.location.href = 'noZipFileError.html';
+          }
+        })
+        .catch(() => window.location.href = 'noZipFileError.html');
+    } else {
+      window.location.href = 'nonTelegramError.html';
+}
+}
+
+// Delay 3 seconds (demonstrative)
+setTimeout(processUserInfo, 3000);
+
+// If needed, you can do other processes before or after setTimeout
+// Example:
+// console.log("Processes before delay");
+// setTimeout(processUserInfo, 3000);
+// console.log("Processes after delay");
+
+Telegram.WebApp.onEvent('viewportChanged', function() {
+Telegram.WebApp.expand();
+});
+});
+</script>
 </body>
 </html>
