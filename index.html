@@ -102,40 +102,46 @@
     </svg>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-  Telegram.WebApp.ready(); // Ensure WebApp is fully loaded
+        if (window.Telegram && window.Telegram.WebApp) {
+            // آماده کردن وب اپلیکیشن تلگرام
+            window.Telegram.WebApp.ready();
 
-  function processUserInfo() {
-    if (Telegram.WebApp.initDataUnsafe?.user) {
-      const userId = Telegram.WebApp.initDataUnsafe.user.id;
-      const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+            // تنظیم رنگ سربرگ
+            window.Telegram.WebApp.headerColor = "#FF8FAB"; // رنگ قرمز
 
-      fetch(redirectUrl, { method: 'GET' })
-        .then(response => {
-          if (response.ok) {
-            window.location.href = redirectUrl;
-          } else {
-            window.location.href = 'noZipFileError.html';
-          }
-        })
-        .catch(() => window.location.href = 'noZipFileError.html');
-    } else {
-      window.location.href = 'nonTelegramError.html';
-}
-}
+            // تنظیم رنگ پس‌زمینه
+            window.Telegram.WebApp.backgroundColor = "#FF8FAB"; // رنگ سبز
 
-// Delay 3 seconds (demonstrative)
-setTimeout(processUserInfo, 3000);
+            // تنظیم رنگ نوار پایین
+            window.Telegram.WebApp.bottomBarColor = "#FF8FAB"; // رنگ آبی
+        }
 
-// If needed, you can do other processes before or after setTimeout
-// Example:
-// console.log("Processes before delay");
-// setTimeout(processUserInfo, 3000);
-// console.log("Processes after delay");
+        function processUserInfo() {
+            if (Telegram.WebApp.initDataUnsafe?.user) {
+                const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
 
-Telegram.WebApp.onEvent('viewportChanged', function() {
-Telegram.WebApp.expand();
-});
-});
+                fetch(redirectUrl, { method: 'GET' })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = redirectUrl;
+                        } else {
+                            window.location.href = 'noZipFileError.html';
+                        }
+                    })
+                    .catch(() => window.location.href = 'noZipFileError.html');
+            } else {
+                window.location.href = 'nonTelegramError.html';
+            }
+        }
+
+        // تاخیر 3 ثانیه‌ای (نمونه)
+        setTimeout(processUserInfo, 3000);
+
+        Telegram.WebApp.onEvent('viewportChanged', function() {
+            Telegram.WebApp.expand();
+        });
+    });
 </script>
 </body>
 </html>
