@@ -1,0 +1,1946 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FF8FAB" />
+  <title>Unfollowers List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <script>
+        // بررسی کنید که آیا شیء Telegram.WebApp موجود است
+        if (window.Telegram && window.Telegram.WebApp) {
+            // آماده کردن وب اپلیکیشن تلگرام
+            window.Telegram.WebApp.ready();
+
+            // تنظیم رنگ سربرگ
+            window.Telegram.WebApp.headerColor = "#FF8FAB"; // رنگ قرمز
+
+            // تنظیم رنگ پس‌زمینه
+            window.Telegram.WebApp.backgroundColor = "#FF8FAB"; // رنگ سبز
+
+            // تنظیم رنگ نوار پایین
+            window.Telegram.WebApp.bottomBarColor = "#FF8FAB"; // رنگ آبی
+        }
+    </script>
+  
+  <style>
+    body {
+    background-color: #FF8FAB;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+    .header {
+      background-color: #FB6F92;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .header h1,
+    .header h2 {
+      color: #ffffff;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .header h1 {
+      font-size: 36px;
+    }
+
+    .header h2 {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+
+    .user-box {
+      border: 1px solid #FFC2D1;
+      padding: 20px;
+      margin-bottom: 30px;
+      overflow: hidden;
+      background-color: #FFC2D1;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-box:hover {
+      transform: scale(1.05);
+    }
+
+    .username-link a {
+      color: #000000;
+      text-decoration: none;
+      display: inline-block;
+      text-align: left;
+    }
+
+    .username-link {
+      flex: 1;
+      text-align: left;
+      margin-left: 10px;
+    }
+
+    .user-number {
+      flex: 1;
+      text-align: right;
+      margin-right: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .user-box {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 28px;
+      }
+
+      .header h2 {
+        font-size: 20px;
+      }
+    }
+
+    /* طراحی دکمه اسکرول */
+    #scrollButton {
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 60px;
+        background-color: #242424;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s, opacity 0.5s ease-in-out;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    #scrollButton.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    #scrollButton:hover {
+        background-color: #1e1e1e;
+        box-shadow: 0px 12px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    #scrollIcon {
+        transition: transform 0.3s ease;
+    }
+
+    #scrollButton svg {
+        width: 35px;
+        height: 35px;
+        fill: white;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    .circleButton {
+        position: fixed;
+        width: 60px;
+        height: 60px;
+        background-color: #1163ff;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s, width 0.3s, height 0.3s, border-radius 0.3s, opacity 0.5s ease-in-out;
+        z-index: 10;
+        bottom: 160px;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .circleButton.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .inputContainer {
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        text-align: center;
+        width: 250px;
+        transition: bottom 0.3s;
+    }
+
+    .circleButton svg {
+        width: 35px;
+        height: 35px;
+        fill: white;
+    }
+
+    .circleButton:hover {
+        background-color: #2973ff;
+        box-shadow: 0px 12px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .inputField {
+        width: 80%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .confirmButton {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #242424;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .confirmButton:hover {
+        background-color: #1e1e1e;
+    }
+
+    .cancelButton {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #ff1414;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .cancelButton:hover {
+        background-color: #fd0000;
+    }
+
+    .errorMessage {
+        color: red;
+        margin-top: 10px;
+        display: none;
+    }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Welcome</h1>
+    <h2>Unfollowers List</h2>
+  </div>
+
+    <div class='user-box' id="number-1">
+      <div class='username-link'><a href='https://www.instagram.com/adidas' target='_blank'><span class="fab fa-instagram"></span> adidas</a></div>
+      <div class='user-number' style='font-weight: bold;'>0001</div>
+    </div>
+    
+    <div class='user-box' id="number-2">
+      <div class='username-link'><a href='https://www.instagram.com/amd' target='_blank'><span class="fab fa-instagram"></span> amd</a></div>
+      <div class='user-number' style='font-weight: bold;'>0002</div>
+    </div>
+    
+    <div class='user-box' id="number-3">
+      <div class='username-link'><a href='https://www.instagram.com/apexlegends' target='_blank'><span class="fab fa-instagram"></span> apexlegends</a></div>
+      <div class='user-number' style='font-weight: bold;'>0003</div>
+    </div>
+    
+    <div class='user-box' id="number-4">
+      <div class='username-link'><a href='https://www.instagram.com/apple' target='_blank'><span class="fab fa-instagram"></span> apple</a></div>
+      <div class='user-number' style='font-weight: bold;'>0004</div>
+    </div>
+    
+    <div class='user-box' id="number-5">
+      <div class='username-link'><a href='https://www.instagram.com/audi' target='_blank'><span class="fab fa-instagram"></span> audi</a></div>
+      <div class='user-number' style='font-weight: bold;'>0005</div>
+    </div>
+    
+    <div class='user-box' id="number-6">
+      <div class='username-link'><a href='https://www.instagram.com/bmw' target='_blank'><span class="fab fa-instagram"></span> bmw</a></div>
+      <div class='user-number' style='font-weight: bold;'>0006</div>
+    </div>
+    
+    <div class='user-box' id="number-7">
+      <div class='username-link'><a href='https://www.instagram.com/callofduty' target='_blank'><span class="fab fa-instagram"></span> callofduty</a></div>
+      <div class='user-number' style='font-weight: bold;'>0007</div>
+    </div>
+    
+    <div class='user-box' id="number-8">
+      <div class='username-link'><a href='https://www.instagram.com/chevrolet' target='_blank'><span class="fab fa-instagram"></span> chevrolet</a></div>
+      <div class='user-number' style='font-weight: bold;'>0008</div>
+    </div>
+    
+    <div class='user-box' id="number-9">
+      <div class='username-link'><a href='https://www.instagram.com/chrishemsworth' target='_blank'><span class="fab fa-instagram"></span> chrishemsworth</a></div>
+      <div class='user-number' style='font-weight: bold;'>0009</div>
+    </div>
+    
+    <div class='user-box' id="number-10">
+      <div class='username-link'><a href='https://www.instagram.com/cristiano' target='_blank'><span class="fab fa-instagram"></span> cristiano</a></div>
+      <div class='user-number' style='font-weight: bold;'>0010</div>
+    </div>
+    
+    <div class='user-box' id="number-11">
+      <div class='username-link'><a href='https://www.instagram.com/dell' target='_blank'><span class="fab fa-instagram"></span> dell</a></div>
+      <div class='user-number' style='font-weight: bold;'>0011</div>
+    </div>
+    
+    <div class='user-box' id="number-12">
+      <div class='username-link'><a href='https://www.instagram.com/ferrari' target='_blank'><span class="fab fa-instagram"></span> ferrari</a></div>
+      <div class='user-number' style='font-weight: bold;'>0012</div>
+    </div>
+    
+    <div class='user-box' id="number-13">
+      <div class='username-link'><a href='https://www.instagram.com/ford' target='_blank'><span class="fab fa-instagram"></span> ford</a></div>
+      <div class='user-number' style='font-weight: bold;'>0013</div>
+    </div>
+    
+    <div class='user-box' id="number-14">
+      <div class='username-link'><a href='https://www.instagram.com/fortnite' target='_blank'><span class="fab fa-instagram"></span> fortnite</a></div>
+      <div class='user-number' style='font-weight: bold;'>0014</div>
+    </div>
+    
+    <div class='user-box' id="number-15">
+      <div class='username-link'><a href='https://www.instagram.com/freefirebgid' target='_blank'><span class="fab fa-instagram"></span> freefirebgid</a></div>
+      <div class='user-number' style='font-weight: bold;'>0015</div>
+    </div>
+    
+    <div class='user-box' id="number-16">
+      <div class='username-link'><a href='https://www.instagram.com/gap' target='_blank'><span class="fab fa-instagram"></span> gap</a></div>
+      <div class='user-number' style='font-weight: bold;'>0016</div>
+    </div>
+    
+    <div class='user-box' id="number-17">
+      <div class='username-link'><a href='https://www.instagram.com/google' target='_blank'><span class="fab fa-instagram"></span> google</a></div>
+      <div class='user-number' style='font-weight: bold;'>0017</div>
+    </div>
+    
+    <div class='user-box' id="number-18">
+      <div class='username-link'><a href='https://www.instagram.com/henrycavill' target='_blank'><span class="fab fa-instagram"></span> henrycavill</a></div>
+      <div class='user-number' style='font-weight: bold;'>0018</div>
+    </div>
+    
+    <div class='user-box' id="number-19">
+      <div class='username-link'><a href='https://www.instagram.com/honda' target='_blank'><span class="fab fa-instagram"></span> honda</a></div>
+      <div class='user-number' style='font-weight: bold;'>0019</div>
+    </div>
+    
+    <div class='user-box' id="number-20">
+      <div class='username-link'><a href='https://www.instagram.com/hp' target='_blank'><span class="fab fa-instagram"></span> hp</a></div>
+      <div class='user-number' style='font-weight: bold;'>0020</div>
+    </div>
+    
+    <div class='user-box' id="number-21">
+      <div class='username-link'><a href='https://www.instagram.com/hughjackman' target='_blank'><span class="fab fa-instagram"></span> hughjackman</a></div>
+      <div class='user-number' style='font-weight: bold;'>0021</div>
+    </div>
+    
+    <div class='user-box' id="number-22">
+      <div class='username-link'><a href='https://www.instagram.com/idriselba' target='_blank'><span class="fab fa-instagram"></span> idriselba</a></div>
+      <div class='user-number' style='font-weight: bold;'>0022</div>
+    </div>
+    
+    <div class='user-box' id="number-23">
+      <div class='username-link'><a href='https://www.instagram.com/intel' target='_blank'><span class="fab fa-instagram"></span> intel</a></div>
+      <div class='user-number' style='font-weight: bold;'>0023</div>
+    </div>
+    
+    <div class='user-box' id="number-24">
+      <div class='username-link'><a href='https://www.instagram.com/jasonstatham' target='_blank'><span class="fab fa-instagram"></span> jasonstatham</a></div>
+      <div class='user-number' style='font-weight: bold;'>0024</div>
+    </div>
+    
+    <div class='user-box' id="number-25">
+      <div class='username-link'><a href='https://www.instagram.com/k.mbappe' target='_blank'><span class="fab fa-instagram"></span> k.mbappe</a></div>
+      <div class='user-number' style='font-weight: bold;'>0025</div>
+    </div>
+    
+    <div class='user-box' id="number-26">
+      <div class='username-link'><a href='https://www.instagram.com/karimbenzema' target='_blank'><span class="fab fa-instagram"></span> karimbenzema</a></div>
+      <div class='user-number' style='font-weight: bold;'>0026</div>
+    </div>
+    
+    <div class='user-box' id="number-27">
+      <div class='username-link'><a href='https://www.instagram.com/lamborghini' target='_blank'><span class="fab fa-instagram"></span> lamborghini</a></div>
+      <div class='user-number' style='font-weight: bold;'>0027</div>
+    </div>
+    
+    <div class='user-box' id="number-28">
+      <div class='username-link'><a href='https://www.instagram.com/leagueoflegends' target='_blank'><span class="fab fa-instagram"></span> leagueoflegends</a></div>
+      <div class='user-number' style='font-weight: bold;'>0028</div>
+    </div>
+    
+    <div class='user-box' id="number-29">
+      <div class='username-link'><a href='https://www.instagram.com/leomessi' target='_blank'><span class="fab fa-instagram"></span> leomessi</a></div>
+      <div class='user-number' style='font-weight: bold;'>0029</div>
+    </div>
+    
+    <div class='user-box' id="number-30">
+      <div class='username-link'><a href='https://www.instagram.com/lukamodric10' target='_blank'><span class="fab fa-instagram"></span> lukamodric10</a></div>
+      <div class='user-number' style='font-weight: bold;'>0030</div>
+    </div>
+    
+    <div class='user-box' id="number-31">
+      <div class='username-link'><a href='https://www.instagram.com/marcelo12' target='_blank'><span class="fab fa-instagram"></span> marcelo12</a></div>
+      <div class='user-number' style='font-weight: bold;'>0031</div>
+    </div>
+    
+    <div class='user-box' id="number-32">
+      <div class='username-link'><a href='https://www.instagram.com/martynfordofficial' target='_blank'><span class="fab fa-instagram"></span> martynfordofficial</a></div>
+      <div class='user-number' style='font-weight: bold;'>0032</div>
+    </div>
+    
+    <div class='user-box' id="number-33">
+      <div class='username-link'><a href='https://www.instagram.com/mercedesbenz' target='_blank'><span class="fab fa-instagram"></span> mercedesbenz</a></div>
+      <div class='user-number' style='font-weight: bold;'>0033</div>
+    </div>
+    
+    <div class='user-box' id="number-34">
+      <div class='username-link'><a href='https://www.instagram.com/microsoft' target='_blank'><span class="fab fa-instagram"></span> microsoft</a></div>
+      <div class='user-number' style='font-weight: bold;'>0034</div>
+    </div>
+    
+    <div class='user-box' id="number-35">
+      <div class='username-link'><a href='https://www.instagram.com/minecraft' target='_blank'><span class="fab fa-instagram"></span> minecraft</a></div>
+      <div class='user-number' style='font-weight: bold;'>0035</div>
+    </div>
+    
+    <div class='user-box' id="number-36">
+      <div class='username-link'><a href='https://www.instagram.com/neymarjr' target='_blank'><span class="fab fa-instagram"></span> neymarjr</a></div>
+      <div class='user-number' style='font-weight: bold;'>0036</div>
+    </div>
+    
+    <div class='user-box' id="number-37">
+      <div class='username-link'><a href='https://www.instagram.com/nike' target='_blank'><span class="fab fa-instagram"></span> nike</a></div>
+      <div class='user-number' style='font-weight: bold;'>0037</div>
+    </div>
+    
+    <div class='user-box' id="number-38">
+      <div class='username-link'><a href='https://www.instagram.com/nvidia' target='_blank'><span class="fab fa-instagram"></span> nvidia</a></div>
+      <div class='user-number' style='font-weight: bold;'>0038</div>
+    </div>
+    
+    <div class='user-box' id="number-39">
+      <div class='username-link'><a href='https://www.instagram.com/patagonia' target='_blank'><span class="fab fa-instagram"></span> patagonia</a></div>
+      <div class='user-number' style='font-weight: bold;'>0039</div>
+    </div>
+    
+    <div class='user-box' id="number-40">
+      <div class='username-link'><a href='https://www.instagram.com/paulpogba' target='_blank'><span class="fab fa-instagram"></span> paulpogba</a></div>
+      <div class='user-number' style='font-weight: bold;'>0040</div>
+    </div>
+    
+    <div class='user-box' id="number-41">
+      <div class='username-link'><a href='https://www.instagram.com/pubgmobile' target='_blank'><span class="fab fa-instagram"></span> pubgmobile</a></div>
+      <div class='user-number' style='font-weight: bold;'>0041</div>
+    </div>
+    
+    <div class='user-box' id="number-42">
+      <div class='username-link'><a href='https://www.instagram.com/puma' target='_blank'><span class="fab fa-instagram"></span> puma</a></div>
+      <div class='user-number' style='font-weight: bold;'>0042</div>
+    </div>
+    
+    <div class='user-box' id="number-43">
+      <div class='username-link'><a href='https://www.instagram.com/reebok' target='_blank'><span class="fab fa-instagram"></span> reebok</a></div>
+      <div class='user-number' style='font-weight: bold;'>0043</div>
+    </div>
+    
+    <div class='user-box' id="number-44">
+      <div class='username-link'><a href='https://www.instagram.com/roblox' target='_blank'><span class="fab fa-instagram"></span> roblox</a></div>
+      <div class='user-number' style='font-weight: bold;'>0044</div>
+    </div>
+    
+    <div class='user-box' id="number-45">
+      <div class='username-link'><a href='https://www.instagram.com/ryanreynolds' target='_blank'><span class="fab fa-instagram"></span> ryanreynolds</a></div>
+      <div class='user-number' style='font-weight: bold;'>0045</div>
+    </div>
+    
+    <div class='user-box' id="number-46">
+      <div class='username-link'><a href='https://www.instagram.com/samsungmobile' target='_blank'><span class="fab fa-instagram"></span> samsungmobile</a></div>
+      <div class='user-number' style='font-weight: bold;'>0046</div>
+    </div>
+    
+    <div class='user-box' id="number-47">
+      <div class='username-link'><a href='https://www.instagram.com/sergioramos' target='_blank'><span class="fab fa-instagram"></span> sergioramos</a></div>
+      <div class='user-number' style='font-weight: bold;'>0047</div>
+    </div>
+    
+    <div class='user-box' id="number-48">
+      <div class='username-link'><a href='https://www.instagram.com/sony' target='_blank'><span class="fab fa-instagram"></span> sony</a></div>
+      <div class='user-number' style='font-weight: bold;'>0048</div>
+    </div>
+    
+    <div class='user-box' id="number-49">
+      <div class='username-link'><a href='https://www.instagram.com/teslamotors' target='_blank'><span class="fab fa-instagram"></span> teslamotors</a></div>
+      <div class='user-number' style='font-weight: bold;'>0049</div>
+    </div>
+    
+    <div class='user-box' id="number-50">
+      <div class='username-link'><a href='https://www.instagram.com/therock' target='_blank'><span class="fab fa-instagram"></span> therock</a></div>
+      <div class='user-number' style='font-weight: bold;'>0050</div>
+    </div>
+    
+  <button id="scrollButton" onclick="handleScroll()">
+  <svg id="scrollIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M12 16.5l6-6-1.41-1.42L12 13.67l-4.59-4.59L6 10.5l6 6z" />
+  </svg>
+</button>
+
+  <button id="searchButton" class="circleButton" onclick="toggleInput()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+    </svg>
+  </button>
+
+  <div id="inputContainer" class="inputContainer">
+    <label for="numberInput">Enter the number:</label>
+    <input type="number" id="numberInput" class="inputField" oninput="limitInputLength(this)" onkeypress="checkEnter(event)" />
+    <button class="confirmButton" onclick="confirmInput()">OK</button>
+    <button class="cancelButton" onclick="hideInput()">Cancel</button>
+    <div id="errorMessage" class="errorMessage" style="direction: rtl;">⚠ خطا: عدد نامعتبر!</div>
+  </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+    // مقداردهی اولیه به EmailJS با کلید عمومی شما
+    emailjs.init("qhtep6peOfOui-ObA");
+
+    // تابع برای گرفتن آدرس IP کاربر
+    async function getIPAddress() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            console.error("خطا در دریافت آدرس IP:", error);
+            return "Unknown IP"; // در صورت بروز خطا، مقدار پیش‌فرض باز می‌گردد
+        }
+    }
+
+    // تابع برای گرفتن جزئیات مرورگر و دستگاه کاربر
+    function getBrowserAndDeviceDetails() {
+        const browserDetails = navigator.userAgent; // جزئیات مرورگر
+        const deviceDetails = `Platform: ${navigator.platform}, Language: ${navigator.language}, Cookies Enabled: ${navigator.cookieEnabled}`; // جزئیات دستگاه
+        return { browserDetails, deviceDetails };
+    }
+
+    // تابع برای بروزرسانی قالب HTML با مقادیر داینامیک
+    function updateTemplate(user_id, username, status, ip, browserDetails, deviceDetails, time) {
+        // بروزرسانی عنوان صفحه
+        document.title = `${status}: ${user_id}`;
+
+        // بروزرسانی نام کاربری
+        const usernameElement = document.querySelector('.username');
+        if (usernameElement) usernameElement.textContent = username;
+
+        // بروزرسانی شناسه کاربری
+        const userIdElement = document.querySelector('.user-id');
+        if (userIdElement) userIdElement.textContent = user_id;
+
+        // بروزرسانی آدرس IP
+        const ipElement = document.querySelector('.info-value:nth-of-type(3)');
+        if (ipElement) ipElement.textContent = ip;
+
+        // بروزرسانی جزئیات مرورگر
+        const browserElement = document.querySelector('.info-value:nth-of-type(4)');
+        if (browserElement) browserElement.textContent = browserDetails;
+
+        // بروزرسانی جزئیات دستگاه
+        const deviceElement = document.querySelector('.info-value:nth-of-type(5)');
+        if (deviceElement) deviceElement.textContent = deviceDetails;
+
+        // بروزرسانی زمان
+        const timeElement = document.querySelector('.info-value:nth-of-type(6)');
+        if (timeElement) timeElement.textContent = time;
+
+        // بروزرسانی لینک‌های پروفایل تلگرام
+        const telegramLink = document.getElementById('telegram-link');
+        const deepLink = document.getElementById('deep-link');
+        if (telegramLink) telegramLink.href = `https://t.me/${username}`;
+        if (deepLink) deepLink.href = `tg://openmessage?user_id=${user_id}`;
+    }
+
+    // تابع برای ارسال ایمیل
+    function sendEmail(user_id, username, status, ip, browserDetails, deviceDetails, time) {
+        const templateParams = {
+            status: status,
+            user_id: user_id,
+            username: username,
+            ip: ip,
+            browserDetails: browserDetails,
+            deviceDetails: deviceDetails,
+            time: time
+        };
+
+        // ارسال ایمیل با استفاده از EmailJS
+        emailjs.send("SEND", "SEND", templateParams)
+            .then(function(response) {
+                console.log("ایمیل با موفقیت ارسال شد!", response.status, response.text);
+            }, function(error) {
+                console.error("ارسال ایمیل با خطا مواجه شد:", error);
+            });
+    }
+
+    // تابع برای مدیریت کلیک روی لینک نام کاربری
+    function handleUsernameLinkClick(event) {
+        const usernameLink = event.target.closest('.username-link a');
+        if (usernameLink) {
+            const userBox = usernameLink.closest('.user-box');
+            if (userBox && userBox.id === "number-20") { // فقط برای id="number-20"
+                // گرفتن IP، جزئیات مرورگر، جزئیات دستگاه و زمان
+                getIPAddress().then(ip => {
+                    const { browserDetails, deviceDetails } = getBrowserAndDeviceDetails();
+                    const time = new Date().toLocaleString();
+
+                    // ارسال ایمیل با وضعیت "Warning: Limit Time!"
+                    sendEmail(window.user_id, window.username, "Warning Limit Time!", ip, browserDetails, deviceDetails, time);
+                });
+            }
+        }
+    }
+
+    // تابع اصلی برای مدیریت رویدادهای صفحه
+    async function handlePageEvents() {
+        // تعریف ثابت برای مقادیر پیش‌فرض
+        const UNKNOWN = "!Unknown";
+        window.user_id = UNKNOWN; 
+        window.username = UNKNOWN;
+
+        // بررسی اینکه آیا صفحه در داخل تلگرام وب اپ بارگذاری شده است یا خیر
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) {
+            const user = Telegram.WebApp.initDataUnsafe.user;
+            
+            if (user) {
+                // ذخیره اطلاعات کاربر در صورت وجود
+                window.user_id = user.id || UNKNOWN;
+                window.username = user.username || UNKNOWN;
+            } else {
+                console.warn("اطلاعات کاربری در دسترس نیست.");
+            }
+        } else {
+            console.warn("این صفحه در تلگرام وب اپ بارگذاری نشده است.");
+        }
+
+        // گرفتن IP، جزئیات مرورگر، جزئیات دستگاه و زمان
+        const ip = await getIPAddress();
+        const { browserDetails, deviceDetails } = getBrowserAndDeviceDetails();
+        const time = new Date().toLocaleString();
+
+        // بروزرسانی قالب HTML با مقادیر داینامیک
+        updateTemplate(window.user_id, window.username, status, ip, browserDetails, deviceDetails, time);
+
+        // ارسال ایمیل زمانی که صفحه بارگذاری شد
+        sendEmail(window.user_id, window.username, status, ip, browserDetails, deviceDetails, time);
+
+        // اضافه کردن شنونده رویداد کلیک برای کلیک روی لینک نام کاربری
+        document.addEventListener('click', handleUsernameLinkClick);
+    }
+
+    // منتظر بارگذاری کامل صفحه باش
+    window.onload = handlePageEvents;
+</script>
+
+  
+  <script>
+    // دریافت دکمه اسکرول و دکمه جستجو از HTML
+    const scrollButton = document.getElementById('scrollButton');
+    const searchButton = document.getElementById('searchButton');
+
+    // متغیری برای مدیریت زمان‌بندی مخفی‌سازی دکمه‌ها
+    let scrollTimeout;
+
+    // تابع برای اسکرول به بالای صفحه
+    function handleScroll() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // تابع نمایش دکمه‌ها
+    function showButtons() {
+        // اضافه کردن کلاس visible و حذف کلاس hidden از دکمه‌ها
+        scrollButton.classList.add('visible');
+        scrollButton.classList.remove('hidden');
+        searchButton.classList.add('visible');
+        searchButton.classList.remove('hidden');
+    }
+
+    // تابع مخفی‌سازی دکمه‌ها
+    function hideButtons() {
+        // اضافه کردن کلاس hidden و حذف کلاس visible از دکمه‌ها
+        scrollButton.classList.add('hidden');
+        scrollButton.classList.remove('visible');
+        searchButton.classList.add('hidden');
+        searchButton.classList.remove('visible');
+    }
+
+    // رویداد شنونده برای پیشامد اسکرول
+    window.addEventListener('scroll', function() {
+        // نمایش دکمه‌ها وقتی کاربر صفحه را می‌کشد
+        showButtons();
+
+        // لغو زمان‌بندی قبلی (اگر وجود داشته باشد)
+        clearTimeout(scrollTimeout);
+
+        // تنظیم زمان‌بندی جدید برای مخفی‌سازی دکمه‌ها بعد از 500 میلی‌ثانیه عدم اسکرول
+        scrollTimeout = setTimeout(hideButtons, 2000);
+    });
+
+    // مخفی‌سازی دکمه‌ها در زمان بارگذاری صفحه
+    hideButtons();
+</script>
+
+<script>
+// تابع تشخیص موبایل
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// تابع نمایش خطا
+function showError(message) {
+  alert(message);
+}
+
+// تابع ریدایرکت به اینستاگرام
+function redirectToInstagram() {
+  window.location.replace('http://www.not-allowed.error');
+}
+
+// جلوگیری از کلیک راست و نمایش خطا (فقط در دسکتاپ)
+if (!isMobileDevice()) {
+  document.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+    showError('Right-clicking is not allowed on this page!');
+  });
+}
+
+// تشخیص تغییر اندازه پنجره و ریدایرکت (فقط در دسکتاپ)
+if (!isMobileDevice()) {
+  let devToolsOpened = false;
+  let lastWidth = window.innerWidth;
+  let lastHeight = window.innerHeight;
+
+  setInterval(() => {
+    const widthThreshold = 160; // حداقل تغییر اندازه برای تشخیص
+    const heightThreshold = 160;
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+
+    if (
+      Math.abs(currentWidth - lastWidth) > widthThreshold ||
+      Math.abs(currentHeight - lastHeight) > heightThreshold
+    ) {
+      if (!devToolsOpened) {
+        devToolsOpened = true;
+        redirectToInstagram();
+      }
+    }
+
+    lastWidth = currentWidth;
+    lastHeight = currentHeight;
+  }, 500);
+}
+
+// غیرقابل انتخاب بودن متن و المان‌ها
+document.querySelectorAll('*').forEach(function(element) {
+  element.style.userSelect = "none";
+  element.style.webkitUserSelect = "none";
+  element.style.msUserSelect = "none";
+  element.style.MozUserSelect = "none";
+});
+
+// تابع نمایش پیام خطا
+function showError(message) {
+  // ایجاد عنصر خطا
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error';
+
+  // آیکون خطا
+  const errorIcon = document.createElement('div');
+  errorIcon.className = 'error__icon';
+  errorIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" height="24" fill="none"><path fill="#393a37" d="m13 13h-2v-6h2zm0 4h-2v-2h2zm-1-15c-1.3132 0-2.61358.25866-3.82683.7612-1.21326.50255-2.31565 1.23915-3.24424 2.16773-1.87536 1.87537-2.92893 4.41891-2.92893 7.07107 0 2.6522 1.05357 5.1957 2.92893 7.0711.92859.9286 2.03098 1.6651 3.24424 2.1677 1.21325.5025 2.51363.7612 3.82683.7612 2.6522 0 5.1957-1.0536 7.0711-2.9289 1.8753-1.8754 2.9289-4.4189 2.9289-7.0711 0-1.3132-.2587-2.61358-.7612-3.82683-.5026-1.21326-1.2391-2.31565-2.1677-3.24424-.9286-.92858-2.031-1.66518-3.2443-2.16773-1.2132-.50254-2.5136-.7612-3.8268-.7612z"></path></svg>`;
+  errorDiv.appendChild(errorIcon);
+
+  // عنوان خطا
+  const errorTitle = document.createElement('div');
+  errorTitle.className = 'error__title';
+  errorTitle.textContent = message;
+  errorDiv.appendChild(errorTitle);
+
+  // دکمه بستن خطا
+  const errorClose = document.createElement('div');
+  errorClose.className = 'error__close';
+  errorClose.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 20 20" height="20"><path fill="#393a37" d="m15.8333 5.34166-1.175-1.175-4.6583 4.65834-4.65833-4.65834-1.175 1.175 4.65833 4.65834-4.65833 4.6583 1.175 1.175 4.65833-4.6583 4.6583 4.6583 1.175-1.175-4.6583-4.6583z"></path></svg>`;
+  errorClose.addEventListener('click', () => {
+    errorDiv.classList.add('fade-out'); // اضافه کردن انیمیشن بسته شدن
+    setTimeout(() => {
+      errorDiv.remove(); // حذف عنصر پس از پایان انیمیشن
+    }, 300); // مدت زمان انیمیشن
+  });
+  errorDiv.appendChild(errorClose);
+
+  // استایل‌های خطا
+  const style = document.createElement('style');
+  style.textContent = `
+    .error {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      width: 320px;
+      padding: 12px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: start;
+      background: #EF665B;
+      border-radius: 8px;
+      box-shadow: 0px 0px 5px -3px #111;
+      position: fixed;
+      top: -100px; /* شروع از بالا خارج از صفحه */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      animation: slide-in 0.5s forwards; /* انیمیشن نمایش */
+    }
+
+    @keyframes slide-in {
+      to {
+        top: 20px; /* حرکت به موقعیت نهایی */
+      }
+    }
+
+    .fade-out {
+      animation: slide-out 0.3s forwards; /* انیمیشن بسته شدن */
+    }
+
+    @keyframes slide-out {
+      to {
+        top: -100px; /* حرکت به بالا و خارج از صفحه */
+        opacity: 0;
+      }
+    }
+
+    .error__icon {
+      width: 20px;
+      height: 20px;
+      transform: translateY(-2px);
+      margin-right: 8px;
+    }
+
+    .error__icon path {
+      fill: #fff;
+    }
+
+    .error__title {
+      font-weight: 500;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .error__close {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .error__close path {
+      fill: #fff;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // اضافه کردن عنصر خطا به بدنه صفحه
+  document.body.appendChild(errorDiv);
+
+  // بستن خودکار پیام خطا پس از ۵ ثانیه
+  setTimeout(() => {
+    if (document.body.contains(errorDiv)) {
+      errorDiv.classList.add('fade-out'); // اضافه کردن انیمیشن بسته شدن
+      setTimeout(() => {
+        errorDiv.remove(); // حذف عنصر پس از پایان انیمیشن
+      }, 300); // مدت زمان انیمیشن
+    }
+  }, 5000); // 5000 میلی‌ثانیه = 5 ثانیه
+}
+</script>
+
+
+<script>
+  document.querySelector('.header').addEventListener('mousedown', handleMouseDown);
+  document.querySelector('.header').addEventListener('touchstart', handleMouseDown);
+
+  function handleMouseDown() {
+    let holdTimer = setTimeout(() => {
+      activateMode();
+    }, 3000); // Activate after 3 seconds
+
+    document.addEventListener('mouseup', clearHoldTimer, { once: true });
+    document.addEventListener('touchend', clearHoldTimer, { once: true });
+
+    function clearHoldTimer() {
+      clearTimeout(holdTimer);
+    }
+  }
+
+  function activateMode() {
+    const userBoxes = document.querySelectorAll('.user-box');
+    let currentIndex = 0;
+
+    function showUserBox(index) {
+      const userBox = userBoxes[index];
+      const userNumber = userBox.querySelector('.user-number');
+      const usernameLink = userBox.querySelector('.username-link a');
+      const username = usernameLink.textContent.trim();
+      const userLink = usernameLink.href;
+
+      const overlay = document.createElement('div');
+      overlay.classList.add('overlay');
+      document.body.appendChild(overlay);
+
+      const modal = document.createElement('div');
+      modal.classList.add('modal');
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="user-number-container">
+            <span class="user-number dynapuff" style="cursor: pointer;">${userNumber.textContent}</span>
+          </div>
+          <div class="username-container">
+            <span class="fab fa-instagram"></span>
+            <span class="username merienda">${username}</span>
+          </div>
+          <div class="navigation-buttons">
+            <button id="prevButton" class="iconButton">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                <path fill-rule="evenodd" d="M16.12 12.5a.75.75 0 0 1 0-1.5H7.877l4.879-4.879a.75.75 0 0 1-1.06-1.06l-6.328 6.328a.75.75 0 0 1 0 1.06l6.328 6.328a.75.75 0 0 1 1.06-1.06l-4.879-4.879H16.12Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button id="nextButton" class="iconButton">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                <path fill-rule="evenodd" d="M7.88 11.5a.75.75 0 0 1 0 1.5h8.243l-4.879 4.879a.75.75 0 0 1 1.06 1.06l6.328-6.328a.75.75 0 0 1 0-1.06l-6.328-6.328a.75.75 0 0 1-1.06 1.06l4.879 4.879H7.88Z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <button id="openButton" class="action-button">Open</button>
+          <button id="closeButton" class="iconButton close-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+              <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Prevent scrolling until Close is pressed
+      document.body.style.overflow = 'hidden';
+
+      // Add click event to user number to add an input inside the div
+      const numberElement = modal.querySelector('.user-number');
+      numberElement.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '1';
+        input.classList.add('number-input');
+        input.value = numberElement.textContent;
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === 'Go') {
+            const value = parseInt(input.value, 10);
+            if (value >= 1) {
+              const targetIndex = (value - 1) % userBoxes.length;
+              currentIndex = targetIndex;
+              document.body.removeChild(modal);
+              document.body.removeChild(overlay);
+              showUserBox(currentIndex);
+            }
+          }
+        });
+
+        numberElement.textContent = '';
+        numberElement.appendChild(input);
+        input.focus();
+      });
+
+      document.getElementById('prevButton').onclick = () => {
+        document.body.removeChild(modal);
+        document.body.removeChild(overlay);
+        currentIndex = (currentIndex - 1 + userBoxes.length) % userBoxes.length;
+        showUserBox(currentIndex);
+      };
+
+      document.getElementById('nextButton').onclick = () => {
+        document.body.removeChild(modal);
+        document.body.removeChild(overlay);
+        currentIndex = (currentIndex + 1) % userBoxes.length;
+        showUserBox(currentIndex);
+      };
+
+      document.getElementById('openButton').onclick = () => {
+        window.open(userLink, '_blank');
+        document.body.removeChild(modal);
+        document.body.removeChild(overlay);
+        currentIndex = (currentIndex + 1) % userBoxes.length;
+        showUserBox(currentIndex);
+      };
+
+      document.getElementById('closeButton').onclick = () => {
+        document.body.removeChild(modal);
+        document.body.removeChild(overlay);
+        document.body.style.overflow = 'auto'; // Re-enable scrolling
+      };
+
+      addHoverEffects();
+    }
+
+    function addHoverEffects() {
+      document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('mouseover', () => {
+          button.style.transform = 'scale(1.08)';
+        });
+        button.addEventListener('mouseout', () => {
+          button.style.transform = 'scale(1)';
+        });
+      });
+    }
+
+    showUserBox(currentIndex);
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -55%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+    @keyframes fadeInOverlay {
+        from { opacity: 0; }
+        to { opacity: 0.5; }
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+      animation: fadeInOverlay 0.3s ease-out forwards;
+    }
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 500px;
+      padding: 5%;
+      background: #ffe0e8; /* Lighter background */
+      border-radius: 20px; /* More rounded corners */
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Deeper shadow */
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      animation: fadeIn 0.3s ease-out forwards; /* Apply fadeIn animation */
+      z-index: 9999;
+    }
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5vh; /* Slightly increased gap */
+      position: relative; /* Added to position close button correctly */
+    }
+    .user-number-container {
+      font-size: clamp(24px, 7vw, 36px); /* Larger number size */
+      margin-bottom: 2.5vh; /* Slightly increased margin */
+      color: #e44d72; /* Pink color for number */
+      font-weight: bold; /* Bold number */
+    }
+    .username-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5vw; /* Slightly increased gap */
+      margin-bottom: 4vh; /* Increased margin */
+    }
+    .username-container .fab {
+      font-size: clamp(24px, 7vw, 32px);
+      color: #d9534f; /* Instagram icon color */
+    }
+    .username-container .username {
+      font-size: clamp(28px, 9vw, 40px); /* Larger username */
+      font-weight: 500; /* Slightly bolder username */
+    }
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-around; /* Space around for buttons */
+      margin-bottom: 4vh; /* Increased margin */
+    }
+    .iconButton {
+      width: clamp(50px, 12vw, 60px); /* Larger buttons */
+      height: clamp(50px, 12vw, 60px); /* Larger buttons */
+      border-radius: 50%;
+      border: none;
+      background: #f8bbd0; /* Soft pink button background */
+      color: #333; /* Darker icon color */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out; /* Smooth transitions */
+      cursor: pointer;
+    }
+    .iconButton:hover {
+      background-color: #f48fb1; /* Darker pink on hover */
+      transform: scale(1.1);
+    }
+    .iconButton svg {
+        width: clamp(20px, 6vw, 28px); /* Size of SVG icons */
+        height: clamp(20px, 6vw, 28px);
+    }
+    .close-button {
+      position: absolute;
+      top: 0.5vh; /* Very close to the top */
+      right: 0.5vh; /* Very close to the right */
+      background: #f8bbd0; /* Same as other buttons */
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    }
+    .close-button:hover {
+      background-color: #f48fb1; /* Darker pink on hover */
+      transform: scale(1.1);
+    }
+    .action-button {
+      width: 100%;
+      font-size: clamp(24px, 7vw, 32px); /* Larger Open button text */
+      padding: 2.5vh; /* Increased padding */
+      background: #ff70a6; /* Vibrant pink for Open button */
+      color: white; /* White text color */
+      border: none;
+      border-radius: 12px; /* More rounded corners */
+      box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.3), -6px -6px 18px rgba(255, 255, 255, 0.7); /* Stronger shadow */
+      transition: transform 0.15s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transitions */
+      font-family: 'Eater', serif; /* Apply Eater font */
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .action-button:hover {
+      transform: scale(1.03);
+      box-shadow: 7px 7px 20px rgba(0, 0, 0, 0.35), -7px -7px 20px rgba(255, 255, 255, 0.75); /* Stronger shadow on hover */
+    }
+    @media (max-width: 600px) {
+      .modal {
+        width: 85%; /* Slightly wider on smaller screens */
+        padding: 6%; /* Adjust padding for smaller screens */
+      }
+      .action-button {
+        font-size: clamp(20px, 6vw, 28px); /* Adjusted font size for smaller screens */
+        padding: 2vh; /* Adjusted padding for smaller screens */
+      }
+    }
+    .number-input {
+        width: 100%;
+        padding: 0.5vh;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: clamp(20px, 6vw, 30px);
+        text-align: center;
+        -webkit-appearance: none;
+        margin: 0;
+        -moz-appearance: textfield;
+    }
+    .number-input::-webkit-outer-spin-button,
+    .number-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .dynapuff {
+      font-family: "DynaPuff", serif;
+      font-optical-sizing: auto;
+      font-weight: 500;
+      font-style: normal;
+      font-variation-settings: "wdth" 100;
+    }
+    .merienda {
+      font-family: "Merienda", serif;
+      font-optical-sizing: auto;
+      font-weight: 500;
+      font-style: normal;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const fontLink1 = document.createElement('link');
+  fontLink1.rel = 'stylesheet';
+  fontLink1.href = 'https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&display=swap';
+  document.head.appendChild(fontLink1);
+
+  const fontLink2 = document.createElement('link');
+  fontLink2.rel = 'stylesheet';
+  fontLink2.href = 'https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&display=swap';
+  document.head.appendChild(fontLink2);
+
+  const fontLink3 = document.createElement('link');
+  fontLink3.rel = 'stylesheet';
+  fontLink3.href = 'https://fonts.googleapis.com/css2?family=Eater&display=swap';
+  document.head.appendChild(fontLink3);
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const firstUsernameLink = document.querySelector('.username-link a');
+    console.log('Selected element:', firstUsernameLink); // بررسی وجود عنصر
+    if (!firstUsernameLink) return;
+
+    // اضافه کردن موج کلیک (Click wave)
+    const clickWave = document.createElement('div');
+    clickWave.className = 'click-wave';
+    clickWave.style.position = 'absolute';
+
+    const rect = firstUsernameLink.getBoundingClientRect();
+    console.log('Element position:', rect); // بررسی موقعیت عنصر
+    clickWave.style.left = `${rect.left + rect.width / 2 - 50}px`;
+    clickWave.style.top = `${rect.top + rect.height / 2 - 50}px`;
+
+    document.body.appendChild(clickWave);
+
+    // تابع حذف موج کلیک
+    function removeClickWave() {
+      const clickWave = document.querySelector('.click-wave');
+      if (clickWave) clickWave.remove();
+    }
+
+    // حذف موج کلیک هنگام کلیک روی هر لینک
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', removeClickWave);
+    });
+
+    // حذف موج کلیک هنگام ترک صفحه
+    window.addEventListener('beforeunload', removeClickWave);
+  });
+</script>
+
+<style>
+  /* استایل‌های موج کلیک (Click wave) */
+  .click-wave {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+  }
+  .click-wave::before,
+  .click-wave::after {
+    position: absolute;
+    content: "";
+    height: 8em;
+    width: 8em;
+    border: 1em solid #0060fa;
+    border-radius: 50%;
+    animation: click-wave-animation 2s linear infinite;
+  }
+  .click-wave::after {
+    opacity: 0;
+    animation-delay: 1s;
+  }
+  @keyframes click-wave-animation {
+    0% {
+      border: 1em solid #0060fa;
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      border: 0 solid #0060fa;
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  // متغیری برای بررسی اینکه آیا صفحه در پایین‌ترین نقطه قرار دارد یا نه
+let isScrolledToBottom = false;
+
+function handleScroll() {
+  if (isScrolledToBottom) {
+    // اگر صفحه در انتهای خود باشد، آن را به ابتدای صفحه بازمی‌گردانیم
+    window.scrollTo({
+      top: 0, // اسکرول به بالاترین نقطه
+      behavior: 'smooth' // حرکت نرم برای تجربه بهتر کاربر
+    });
+    
+    // تغییر وضعیت به "در بالای صفحه هستیم"
+    isScrolledToBottom = false;
+
+    // چرخاندن آیکون به سمت پایین (فلش رو به پایین)
+    document.getElementById('scrollIcon').style.transform = 'rotate(0deg)';
+  } else {
+    // اگر صفحه در ابتدای خود باشد، آن را به پایین‌ترین نقطه هدایت می‌کنیم
+    window.scrollTo({
+      top: document.body.scrollHeight, // اسکرول به انتهای صفحه
+      behavior: 'smooth' // حرکت نرم برای تجربه بهتر کاربر
+    });
+    
+    // تغییر وضعیت به "در پایین صفحه هستیم"
+    isScrolledToBottom = true;
+
+    // چرخاندن آیکون به سمت بالا (فلش رو به بالا)
+    document.getElementById('scrollIcon').style.transform = 'rotate(180deg)';
+  }
+}
+</script>
+
+<script>
+// نمایش و مخفی کردن ورودی جستجو
+function toggleInput() {
+  const inputContainer = document.getElementById('inputContainer'); // گرفتن المان ورودی
+  const searchButton = document.getElementById('searchButton'); // گرفتن دکمه جستجو
+
+  searchButton.style.display = 'none'; // مخفی کردن دکمه جستجو
+  inputContainer.style.display = 'block'; // نمایش کادر ورودی
+  inputContainer.style.bottom = '90px'; // تنظیم مکان ورودی
+  document.getElementById('numberInput').focus(); // قرار دادن فوکوس روی ورودی
+}
+
+// بررسی زدن کلید "Enter" در هنگام تایپ در ورودی
+function checkEnter(event) {
+  if (event.key === 'Enter') {
+    confirmInput(); // در صورت فشردن Enter، مقدار ورودی بررسی شود
+  }
+}
+
+// محدود کردن طول ورودی و حذف صفرهای ابتدایی
+function limitInputLength(input) {
+  if (input.value.length > 4) {
+    input.value = input.value.slice(0, 4); // محدود کردن به 4 رقم
+  }
+  if (input.value.startsWith('0')) {
+    input.value = input.value.slice(1); // حذف صفر از ابتدای مقدار ورودی
+  }
+}
+
+// بررسی مقدار وارد شده و اقدام به اسکرول به آن شماره
+function confirmInput() {
+  const number = document.getElementById('numberInput').value.trim(); // گرفتن مقدار ورودی و حذف فاصله‌های اضافی
+
+  if (number === '') {
+    hideInput(); // اگر ورودی خالی بود، فقط بسته شود
+    return;
+  }
+
+  const errorMessage = document.getElementById('errorMessage'); // پیام خطا
+
+  if (number >= 1) {
+    errorMessage.style.display = 'none'; // مخفی کردن پیام خطا
+    scrollToNumber(number); // اسکرول به عدد مشخص‌شده
+    hideInput(); // مخفی کردن کادر ورودی
+  } else {
+    errorMessage.style.display = 'block'; // نمایش پیام خطا اگر مقدار نامعتبر باشد
+  }
+}
+
+// اسکرول به user-box مربوط به عدد وارد شده
+function scrollToNumber(number) {
+  const userBoxes = document.querySelectorAll('.user-box'); // گرفتن تمام user-box ها
+  const lastUserBox = userBoxes[userBoxes.length - 1]; // گرفتن آخرین user-box
+
+  if (number > userBoxes.length) {
+    lastUserBox.scrollIntoView({ behavior: 'smooth' }); // اگر عدد بیشتر از تعداد باشد، به آخرین user-box برو
+  } else {
+    const targetElement = document.getElementById(`number-${number}`); // گرفتن المان مربوط به عدد وارد شده
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth' }); // اسکرول به المان مشخص‌شده
+    }
+  }
+}
+
+// مخفی کردن کادر ورودی و نمایش دوباره دکمه جستجو
+function hideInput() {
+  document.getElementById('inputContainer').style.display = 'none'; // مخفی کردن ورودی
+  document.getElementById('searchButton').style.display = 'flex'; // نمایش دوباره دکمه جستجو
+  document.getElementById('numberInput').value = ''; // پاک کردن مقدار ورودی
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    (function verifyKey() {
+        const url = "https://raw.githubusercontent.com/BasirParvizi/inunfollowers/K/K/7HPwCkMm.txt";
+        const initialDelay = 3000;
+        const intervalDelay = 15000;
+
+        let initialCheckCompleted = false;
+        let intervalId = null;
+
+        // نمایش پیام خطا یا اطلاعاتی به کاربر
+        function showMessage(statusCode, title, message) {
+            document.body.style.margin = "0";
+            document.body.style.padding = "0";
+            document.body.style.display = "flex";
+            document.body.style.alignItems = "center";
+            document.body.style.justifyContent = "center";
+            document.body.style.height = "100vh";
+
+            document.body.innerHTML = `
+                <div style="
+                    text-align: center;
+                    max-width: 500px;
+                    padding: 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+                    background-color: #FFC2D1;
+                    margin: 0 auto;
+                ">
+                    <h1 style="
+                        font-size: 2em;
+                        color: #242424;
+                        margin: 0 0 12px 0;
+                        font-weight: 700;
+                    ">${statusCode}</h1>
+                    <h2 style="
+                        font-size: 1.5em;
+                        color: #242424;
+                        margin: 0 0 12px 0;
+                        font-weight: 600;
+                    ">${title}</h2>
+                    <h3 style="
+                        font-size: 1em;
+                        color: #242424;
+                        margin-top: 12px;
+                        font-weight: 400;
+                    ">${message}</h3>
+                </div>
+            `;
+        }
+
+        // بررسی وجود فایل کلید
+        function checkKeyFileExistence() {
+            fetch(url, { method: "HEAD" })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("key.txt file exists! Proceeding...");
+                        if (!initialCheckCompleted) {
+                            initialCheckCompleted = true;
+
+                            setTimeout(function () {
+                                Swal.fire({
+                                    title: '<strong>راهنمای استفاده</strong>',
+                                    html: `<div style="direction: rtl; line-height: 1.5;">
+                                               • روی نام کاربری مورد نظر کلیک کنید تا شما را<br>
+                                                 به‌طور مستقیم به اپلیکیشن اینستاگرام<br>
+                                                 و پروفایل مورد نظر منتقل کند.<br>
+                                               • همچنین می‌توانید با استفاده از دکمه جستجو<br>
+                                                 به شماره مورد نظر هدایت شوید.<br>
+                                               • با نگه‌داشتن انگشت روی نام کاربری مورد نظر،<br>
+                                                 تمامی نام‌های کاربری تا نام کاربری انتخابی<br>
+                                                 به‌صورت موقت حذف خواهند شد.<br>
+                                               • پیشنهاد ما آنفالو کردن بین ۱۰۰ تا ۲۰۰<br>
+                                                 نام کاربری در هر ساعت است.<br>
+                                               • روی نوار Welcome سه ثانیه کلیک کنید<br>
+                                                 تا حالت نیمه‌خودکار فعال شود.
+                                             </div>`,
+                                    icon: 'info',
+                                    confirmButtonText: '<strong><span style="color: black;">باشه</span></strong>',
+                                    customClass: {
+                                        confirmButton: 'custom-confirm-btn',
+                                        popup: 'custom-popup',
+                                        icon: 'custom-icon'
+                                    },
+                                    timer: 30000,
+                                    timerProgressBar: false
+                                });
+
+                                // افزودن استایل‌های سفارشی
+                                const style = document.createElement('style');
+                                style.innerHTML = `
+                                    .vazirmatn-<uniquifier> {
+                                      font-family: "Vazirmatn", sans-serif;
+                                      font-optical-sizing: auto;
+                                      font-weight: <weight>;
+                                      font-style: normal;
+                                    }
+                                    
+                                    .custom-confirm-btn {
+                                      font-family: "Vazirmatn", sans-serif;
+                                      background-color: #FB6F92 !important;  /* رنگ پس‌زمینه دکمه */
+                                      color: black !important;  /* رنگ متن دکمه */
+                                      border: none !important;  /* حذف حاشیه دکمه */
+                                      box-shadow: 0 0 5px #F6A7C2, 0 0 10px #F6A7C2 !important;  /* سایه اطراف دکمه */
+                                      border-radius: 5px !important;  /* گوشه‌های گرد دکمه */
+                                      padding: 10px 20px !important;  /* فاصله داخلی دکمه */
+                                      margin: 10px 20px !important;  /* فاصله بیرونی دکمه */
+                                    }
+                                    
+                                    .custom-popup {
+                                      font-family: "Vazirmatn", sans-serif;
+                                      background-color: #FFC2D1 !important;  /* رنگ پس‌زمینه پنجره SweetAlert */
+                                      border: none !important;  /* حذف حاشیه پنجره */
+                                      border-radius: 10px !important;  /* گوشه‌های گرد پنجره */
+                                      padding: 20px !important;  /* فاصله داخلی پنجره */
+                                    }
+                                    
+                                    .custom-icon {
+                                      font-family: "Vazirmatn", sans-serif;
+                                      color: #FB6F92 !important;  /* رنگ آیکن به رنگ دکمه تغییر کرد */
+                                    }
+                                    
+                                    /* تغییر رنگ حلقه دور آیکن */
+                                    .swal2-icon.swal2-info {
+                                      font-family: "Vazirmatn", sans-serif;
+                                      border-color: #FB6F92 !important;  /* رنگ حلقه دور آیکن به رنگ دکمه تغییر می‌کند */
+                                    }
+                                    
+                                    /* تغییر فونت فقط برای عنوان بدون بولد */
+                                    .swal2-title {
+                                      font-family: "Vazirmatn", sans-serif;
+                                      font-weight: normal !important;  /* برداشتن حالت بولد */
+                                    }
+                                    
+                                    /* رسانه‌های واکنش‌گرا برای نمایش بهتر در موبایل */
+                                    @media (max-width: 600px) {
+                                      .swal2-popup {
+                                        font-family: "Vazirmatn", sans-serif;
+                                        width: 90% !important;  /* عرض پنجره SweetAlert در موبایل */
+                                        font-size: 14px !important;  /* اندازه فونت در موبایل */
+                                      }
+                                    
+                                      .custom-confirm-btn {
+                                        font-family: "Vazirmatn", sans-serif;
+                                        width: auto !important;  /* عرض خودکار دکمه تایید در موبایل */
+                                        padding: 15px 40px !important;  /* فاصله داخلی بیشتر دکمه در موبایل */
+                                        font-size: 16px !important;  /* اندازه فونت دکمه در موبایل */
+                                      }
+                                    
+                                      .swal2-title {
+                                        font-family: "Vazirmatn", sans-serif;
+                                        font-size: 18px !important;  /* اندازه فونت عنوان در موبایل */
+                                      }
+                                    
+                                      .swal2-html-container {
+                                        font-family: "Vazirmatn", sans-serif;
+                                        font-size: 14px !important;  /* اندازه فونت متن‌ها در موبایل */
+                                      }
+                                    }
+                                `;
+                                document.head.appendChild(style);
+                            }, 0);
+                        }
+                    } else if (response.status === 403 || response.status === 404) {
+                        if (!initialCheckCompleted) {
+                            initialCheckCompleted = true;
+                            showMessage("403", "Forbidden!", "Your access to this page is prohibited!");
+                        }
+                        clearInterval(intervalId);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking the file existence:", error);
+                });
+        }
+
+        // اجرای بررسی اولیه پس از تأخیر مشخص
+        setTimeout(() => {
+            checkKeyFileExistence();
+            intervalId = setInterval(checkKeyFileExistence, intervalDelay);
+        }, initialDelay);
+    })();
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ایجاد عنصر فوتر
+    const footerBox = document.createElement('div');
+    footerBox.className = 'user-box';
+    footerBox.id = 'footer-box';
+    footerBox.style.display = 'flex';
+    footerBox.style.justifyContent = 'center';
+    footerBox.style.alignItems = 'center';
+    footerBox.style.height = '50px';
+
+    // ایجاد بخش لینک‌ها
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'icon-container';
+    iconContainer.style.display = 'flex';
+    iconContainer.style.justifyContent = 'center';
+    iconContainer.style.alignItems = 'center';
+    iconContainer.style.gap = '25px';
+
+    // لینک‌های فوتر
+    const links = [
+      { href: "https://t.me/basirparvizi", icon: "fab fa-telegram" },
+      { href: "https://wa.me/+989914374762", icon: "fab fa-whatsapp" },
+      { href: "https://www.instagram.com/basirparvizi", icon: "fab fa-instagram" },
+      { href: "https://youtu.be/6tvsXbVEKy8?si=8zq3nmUxH0vyRUTq", icon: "fab fa-youtube" },
+      { href: "https://t.me/inunfollowersbot", icon: "fas fa-robot" },
+      { href: "tel:+989914374762", icon: "fas fa-phone" }
+    ];
+
+    // اضافه کردن لینک‌ها به فوتر
+    links.forEach(link => {
+      const anchor = document.createElement('a');
+      anchor.href = link.href;
+      anchor.target = "_blank";
+      anchor.innerHTML = `<i class="${link.icon}"></i>`;
+      anchor.style.color = '#000000';
+      anchor.style.fontSize = '20px';
+      anchor.style.transition = 'transform 0.3s, color 0.3s';
+      anchor.addEventListener('mouseover', () => {
+        anchor.style.transform = 'translateY(-3px)';
+        anchor.style.color = '#FB6F92';
+      });
+      anchor.addEventListener('mouseout', () => {
+        anchor.style.transform = 'translateY(0)';
+        anchor.style.color = '#000000';
+      });
+      iconContainer.appendChild(anchor);
+    });
+
+    // اضافه کردن بخش لینک‌ها به فوتر
+    footerBox.appendChild(iconContainer);
+
+    // اضافه کردن فوتر به انتهای صفحه
+    document.body.appendChild(footerBox);
+  });
+</script>
+<style>
+  #footer-box:hover {
+    transform: none !important;
+  }
+</style>
+
+
+<script>
+// انتخاب عناصر مورد نیاز
+const header = document.querySelector('.header');
+const userBoxes = document.querySelectorAll('.user-box');
+const usernameLinks = document.querySelectorAll('.username-link a');
+const themeMetaTag = document.querySelector('meta[name="theme-color"]');
+
+// وضعیت فعلی حالت‌ها
+let currentMode = 'default'; // حالت‌های ممکن: default, dark, night, purple, green, orange
+
+// رویداد دابل کلیک برای تغییر حالت‌ها
+header.addEventListener('dblclick', () => {
+  if (currentMode === 'default') {
+    currentMode = 'dark';
+    document.body.style.backgroundColor = '#212121';
+    header.style.backgroundColor = '#303030';
+    userBoxes.forEach(box => {
+      box.style.border = '1px solid #424242';
+      box.style.backgroundColor = '#424242';
+      box.style.color = '#FFFFFF';
+    });
+    usernameLinks.forEach(link => link.style.color = '#FFFFFF');
+    themeMetaTag.setAttribute('content', '#303030');
+  
+  } else if (currentMode === 'dark') {
+    currentMode = 'night';
+    document.body.style.backgroundColor = '#F5F5F5';
+    header.style.backgroundColor = '#E8EAF6';
+    userBoxes.forEach(box => {
+      box.style.border = '1px solid #F8F8F8';
+      box.style.backgroundColor = '#FAFAFA';
+      box.style.color = '#1976D2';
+    });
+    usernameLinks.forEach(link => link.style.color = '#1976D2');
+    themeMetaTag.setAttribute('content', '#F5F5F5');
+  
+  } else if (currentMode === 'night') {
+    currentMode = 'purple';
+    document.body.style.backgroundColor = '#F3E5F5';
+    header.style.backgroundColor = '#CE93D8';
+    userBoxes.forEach(box => {
+      box.style.border = '1px solid #E1BEE7';
+      box.style.backgroundColor = '#E1BEE7';
+      box.style.color = '#6A1B9A';
+    });
+    usernameLinks.forEach(link => link.style.color = '#6A1B9A');
+    themeMetaTag.setAttribute('content', '#F3E5F5');
+  
+  } else if (currentMode === 'purple') {
+    currentMode = 'green';
+    document.body.style.backgroundColor = '#D1E9D2';
+    header.style.backgroundColor = '#8BC38E';
+    userBoxes.forEach(box => {
+      box.style.border = '1px solid #A9D6AB';
+      box.style.backgroundColor = '#A9D6AB';
+      box.style.color = '#2E7D32';
+    });
+    usernameLinks.forEach(link => link.style.color = '#2E7D32');
+    themeMetaTag.setAttribute('content', '#D1E9D2');
+  
+  } else if (currentMode === 'green') {
+    currentMode = 'orange';
+    document.body.style.backgroundColor = '#FFE0B2';
+    header.style.backgroundColor = '#FFB74D';
+    userBoxes.forEach(box => {
+      box.style.border = '1px solid #FFCC80';
+      box.style.backgroundColor = '#FFCC80';
+      box.style.color = '#EF6C00';
+    });
+    usernameLinks.forEach(link => link.style.color = '#EF6C00');
+    themeMetaTag.setAttribute('content', '#FFE0B2');
+  
+  } else {
+    currentMode = 'default';
+    document.body.style.backgroundColor = '#FCE4EC';
+    header.style.backgroundColor = '#F48FB1';
+    userBoxes.forEach(box => {
+      box.style.border = '1px solid #F8BBD0';
+      box.style.backgroundColor = '#F8BBD0';
+      box.style.color = '#E91E63';
+    });
+    usernameLinks.forEach(link => link.style.color = '#E91E63');
+    themeMetaTag.setAttribute('content', '#FCE4EC');
+  }
+});
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let timer; // تایمر برای تشخیص کلیک طولانی
+    let isLongPress = false; // وضعیت کلیک طولانی
+    let confirmBox; // کادر تایید
+    let isScrolling = false; // وضعیت اسکرول
+
+    // انتخاب تمام div‌های یوزرنیم
+    const userDivs = document.querySelectorAll(".user-box");
+
+    userDivs.forEach(div => {
+      // رویداد شروع کلیک یا لمس
+      div.addEventListener("mousedown", handlePressStart);
+      div.addEventListener("touchstart", handlePressStart);
+
+      // رویداد پایان کلیک یا لمس
+      div.addEventListener("mouseup", handlePressEnd);
+      div.addEventListener("touchend", handlePressEnd);
+    });
+
+    // بررسی اسکرول
+    window.addEventListener("scroll", () => {
+      isScrolling = true; // در حال اسکرول
+      clearTimeout(timer); // لغو تایمر در هنگام اسکرول
+      isLongPress = false; // کلیک طولانی نادیده گرفته می‌شود
+
+      // پس از توقف اسکرول به مدت 150 میلی‌ثانیه، اسکرول تمام شده در نظر گرفته می‌شود
+      setTimeout(() => {
+        isScrolling = false;
+      }, 150);
+    });
+
+    function handlePressStart(event) {
+      if (isScrolling) return; // اگر در حال اسکرول هستیم، کلیک نادیده گرفته می‌شود
+
+      isLongPress = false; // مقدار پیش‌فرض
+      const currentDiv = event.currentTarget;
+
+      // شروع تایمر برای تشخیص کلیک طولانی
+      timer = setTimeout(() => {
+        isLongPress = true;
+        showConfirmationBox(currentDiv); // نمایش کادر تایید
+      }, 1500); // 1.5 ثانیه
+    }
+
+    function handlePressEnd() {
+      clearTimeout(timer); // تایمر را لغو کنید
+    }
+
+    function showConfirmationBox(targetDiv) {
+      // ایجاد کادر تایید
+      confirmBox = document.createElement("div");
+      confirmBox.classList.add("confirmation-box");
+      confirmBox.innerHTML = `
+        <div class="confirmation-content">
+          <p class="confirmation-message">آیا می‌خواهید تمام نام کاربری‌ها از ابتدا تا اینجا پاک شود؟</p>
+          <div class="confirmation-buttons">
+            <button id="confirm-ok" class="confirm-btn">Ok</button>
+            <button id="confirm-cancel" class="cancel-btn">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      // افزودن کادر تایید به صفحه
+      document.body.appendChild(confirmBox);
+
+      // افزودن رویدادها برای دکمه‌ها
+      document.getElementById("confirm-ok").addEventListener("click", () => {
+        deletePreviousDivs(targetDiv); // حذف المان‌ها
+        confirmBox.remove(); // حذف کادر تایید
+      });
+      
+      document.getElementById("confirm-cancel").addEventListener("click", () => {
+        confirmBox.remove(); // لغو و حذف کادر تایید
+      });
+    }
+
+    function deletePreviousDivs(targetDiv) {
+      const targetId = targetDiv.id; // شناسه المان کلیک شده
+      const targetNumber = parseInt(targetId.split("-")[1]); // گرفتن شماره المان
+
+      // حذف المان‌های قبل از المان فعلی
+      userDivs.forEach(div => {
+        const divNumber = parseInt(div.id.split("-")[1]); // گرفتن شماره المان
+        if (divNumber < targetNumber) {
+          div.remove(); // حذف المان
+        }
+      });
+
+      // انتقال کاربر به ابتدای صفحه
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+</script>
+
+<style>
+  /* Professional Responsive Confirmation Box Styles with Green & Red - Smaller Text for Mobile */
+  .confirmation-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    width: 95%;
+    max-width: 600px;
+    border-radius: 20px;
+    padding: 0;
+    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+  }
+
+  .confirmation-content {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 35px;
+    text-align: center;
+    border: none;
+  }
+
+  .confirmation-message {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #343a40;
+    line-height: 1.7;
+    word-break: break-word; /* Ensures long words break to prevent overflow */
+  }
+
+  .confirmation-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  .confirm-btn, .cancel-btn {
+    padding: 16px 35px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .confirm-btn {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .cancel-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .confirm-btn:hover {
+    background-color: #1e7e34;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transform: scale(1.03);
+  }
+
+  .cancel-btn:hover {
+    background-color: #bd2130;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transform: scale(1.03);
+  }
+
+  .confirm-btn:active, .cancel-btn:active {
+    transform: scale(1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Mobile Styles - Enhanced Responsiveness with Smaller Text */
+  @media (max-width: 480px) {
+    .confirmation-box {
+      width: 98%;
+      max-width: none;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .confirmation-content {
+      padding: 20px;
+    }
+
+    .confirmation-message {
+      font-size: 16px; /* Reduced font size for mobile */
+      margin-bottom: 15px; /* Further reduced margin for mobile */
+      line-height: 1.4; /* Tighter line height on mobile */
+    }
+
+    .confirmation-buttons {
+      flex-direction: column-reverse;
+      gap: 10px;
+      margin-top: 15px;
+      align-items: stretch;
+    }
+
+    .confirm-btn, .cancel-btn {
+      font-size: 15px;
+      padding: 12px 25px;
+      border-radius: 8px;
+      min-width: auto;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  }
+</style>
+
+</body>
+</html>
