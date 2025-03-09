@@ -9,7 +9,15 @@
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background: linear-gradient(135deg, #ff7eb3, #8e44ad);
+            background: linear-gradient(
+                to bottom,
+                #ff7eb3 0px,          /* نوار بالا شروع */
+                #ff7eb3 20px,         /* نوار بالا پایان */
+                #ff7eb3 20.001px,     /* شروع نرم گرادینت */
+                #8e44ad calc(100% - 20.001px), /* پایان گرادینت */
+                #8e44ad calc(100% - 20px),     /* نوار پایین شروع */
+                #8e44ad 100%          /* نوار پایین پایان */
+            );
             color: #fff;
             display: flex;
             justify-content: center;
@@ -180,6 +188,5 @@
             });
         });
     </script>
-    
 </body>
 </html>
