@@ -13,7 +13,15 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #ff7eb3, #8e44ad);
+            background: linear-gradient(
+                to bottom,
+                #ff7eb3 0px,          /* نوار بالا شروع */
+                #ff7eb3 20px,         /* نوار بالا پایان */
+                #ff7eb3 20.001px,     /* شروع نرم گرادینت */
+                #8e44ad calc(100% - 20.001px), /* پایان گرادینت */
+                #8e44ad calc(100% - 20px),     /* نوار پایین شروع */
+                #8e44ad 100%          /* نوار پایین پایان */
+            );
         }
 
         .pl1 {
@@ -100,48 +108,48 @@
             </g>
         </g>
     </svg>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            // آماده کردن وب اپلیکیشن تلگرام
-            window.Telegram.WebApp.ready();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                // آماده کردن وب اپلیکیشن تلگرام
+                window.Telegram.WebApp.ready();
 
-            // تنظیم رنگ سربرگ
-            window.Telegram.WebApp.headerColor = "#ff7eb3";
+                // تنظیم رنگ سربرگ
+                window.Telegram.WebApp.headerColor = "#ff7eb3";
 
-            // تنظیم رنگ پس‌زمینه
-            window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+                // تنظیم رنگ پس‌زمینه
+                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
 
-            // تنظیم رنگ نوار پایین
-            window.Telegram.WebApp.bottomBarColor = "#8e44ad";
-        }
-
-        function processUserInfo() {
-            if (Telegram.WebApp.initDataUnsafe?.user) {
-                const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-
-                fetch(redirectUrl, { method: 'GET' })
-                    .then(response => {
-                        if (response.ok) {
-                            window.location.href = redirectUrl;
-                        } else {
-                            window.location.href = 'noZipFileError.html';
-                        }
-                    })
-                    .catch(() => window.location.href = 'noZipFileError.html');
-            } else {
-                window.location.href = 'nonTelegramError.html';
+                // تنظیم رنگ نوار پایین
+                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
             }
-        }
 
-        // تاخیر 3 ثانیه‌ای (نمونه)
-        setTimeout(processUserInfo, 3000);
+            function processUserInfo() {
+                if (Telegram.WebApp.initDataUnsafe?.user) {
+                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
 
-        Telegram.WebApp.onEvent('viewportChanged', function() {
-            Telegram.WebApp.expand();
+                    fetch(redirectUrl, { method: 'GET' })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                window.location.href = 'noZipFileError.html';
+                            }
+                        })
+                        .catch(() => window.location.href = 'noZipFileError.html');
+                } else {
+                    window.location.href = 'nonTelegramError.html';
+                }
+            }
+
+            // تاخیر 3 ثانیه‌ای (نمونه)
+            setTimeout(processUserInfo, 3000);
+
+            Telegram.WebApp.onEvent('viewportChanged', function() {
+                Telegram.WebApp.expand();
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
