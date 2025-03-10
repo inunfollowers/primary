@@ -1009,7 +1009,16 @@ function showError(message) {
       };
 
       document.getElementById('openButton').onclick = () => {
-        window.open(userLink, '_blank');
+        // ایجاد لینک و شبیهسازی کلیک
+        const link = document.createElement('a');
+        link.href = userLink;
+        link.target = '_blank';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+            
+        // بستن مودال و ادامه عملیات
         document.body.removeChild(modal);
         document.body.removeChild(overlay);
         currentIndex = (currentIndex + 1) % userBoxes.length;
