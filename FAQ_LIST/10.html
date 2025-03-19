@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #ff7eb3 0px, #ff7eb3 20px, #ff7eb3 20.001px, #8e44ad calc(100% - 20.001px), #8e44ad calc(100% - 20px), #8e44ad 100%);
+            font-family: "Vazirmatn", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 800; /* ExtraBold 800 */
+            font-style: normal;
+            box-sizing: border-box;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .glass-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+            font-family: "Vazirmatn", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 800; /* ExtraBold 800 */
+            font-style: normal;
+        }
+
+        .glass-button {
+            text-decoration: none;
+        }
+
+        .question {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .answer {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            font-family: "Vazirmatn", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 800; /* ExtraBold 800 */
+            font-style: normal;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+            margin-top: 20px;
+            align-self: center;
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ریسپانسیو برای موبایل */
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+            }
+            .glass-box {
+                padding: 15px;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="glass-box question">
+            چرا خدمات ما به‌صورت رایگان ارائه نمی‌شود؟
+        </div>
+        <div class="glass-box answer">
+            به‌منظور ارتقاء مداوم کیفیت خدمات و ارائه خدمات پایدار و به‌روزرسانی‌های منظم،
+لازم است که منابع مالی، فنی و انسانی تأمین شود. به همین دلیل، ارائه این خدمات
+به‌صورت رایگان امکان‌پذیر نیست.
+        </div>
+        <a href="https://inunfollowers.github.io/primary/faq.html" class="glass-button">برگشتن به منو سوالات</a>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                // آماده کردن وب اپلیکیشن تلگرام
+                window.Telegram.WebApp.ready();
+
+                // تنظیم رنگ سربرگ
+                window.Telegram.WebApp.headerColor = "#ff7eb3";
+
+                // تنظیم رنگ پس‌زمینه
+                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+
+                // تنظیم رنگ نوار پایین
+                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
+            }
+        });
+    </script>
+</body>
+</html>
