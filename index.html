@@ -109,138 +109,66 @@
         </g>
     </svg>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            // آماده کردن وب اپلیکیشن تلگرام
-            window.Telegram.WebApp.ready();
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                // آماده کردن وب اپلیکیشن تلگرام
+                window.Telegram.WebApp.ready();
 
-            // تنظیم رنگ سربرگ
-            window.Telegram.WebApp.headerColor = "#ff7eb3";
+                // تنظیم رنگ سربرگ
+                window.Telegram.WebApp.headerColor = "#ff7eb3";
 
-            // تنظیم رنگ پس‌زمینه
-            window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+                // تنظیم رنگ پس‌زمینه
+                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
 
-            // تنظیم رنگ نوار پایین
-            window.Telegram.WebApp.bottomBarColor = "#8e44ad";
-        }
-
-        async function checkIPAndProcess() {
-            try {
-                const response = await fetch('http://ip-api.com/json/');
-                if (!response.ok) {
-                    console.error('خطا در دریافت اطلاعات IP:', response.status);
-                    processUserInfo(); // در صورت خطا در دریافت وضعیت، به فرآیند اصلی بروید
-                    return;
-                }
-                const data = await response.json();
-
-                if (data?.countryCode === 'IR') {
-                    // اگر IP ایران بود، به صفحه VPN ریدایرکت شود
-                    window.location.href = 'https://inunfollowers.github.io/primary/vpn.html';
-                } else {
-                    // اگر IP ایران نبود، ادامه فرآیند اصلی
-                    processUserInfo();
-                }
-            } catch (error) {
-                console.error('خطا در اتصال به API تشخیص IP:', error);
-                // در صورت خطا در اتصال به API، ادامه فرآیند اصلی
-                processUserInfo();
+                // تنظیم رنگ نوار پایین
+                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
             }
-        }
 
-        function processUserInfo() {
-            if (Telegram.WebApp.initDataUnsafe?.user) {
-                const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-
-                fetch(redirectUrl, { method: 'GET' })
-                    .then(response => {
-                        if (response.ok) {
-                            window.location.href = redirectUrl;
+            // تابع برای بررسی کشور از طریق IP
+            function checkCountryAndRedirect() {
+                fetch('http://ip-api.com/json/?fields=countryCode')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.countryCode === 'IR') {
+                            window.location.href = 'vpn.html';
                         } else {
-                            window.location.href = 'noZipFileError.html';
+                            // اگر ایران نبود، ادامه فرآیند اصلی
+                            processUserInfo();
                         }
                     })
-                    .catch(() => window.location.href = 'noZipFileError.html');
-            } else {
-                window.location.href = 'nonTelegramError.html';
+                    .catch(error => {
+                        console.error('Error fetching IP data:', error);
+                        // در صورت خطا، فرآیند اصلی ادامه پیدا کند
+                        processUserInfo();
+                    });
             }
-        }
 
-        // تاخیر 3 ثانیه‌ای (نمونه)
-        setTimeout(checkIPAndProcess, 3000);
+            function processUserInfo() {
+                if (Telegram.WebApp.initDataUnsafe?.user) {
+                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
 
-        Telegram.WebApp.onEvent('viewportChanged', function() {
-            Telegram.WebApp.expand();
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            // آماده کردن وب اپلیکیشن تلگرام
-            window.Telegram.WebApp.ready();
-
-            // تنظیم رنگ سربرگ
-            window.Telegram.WebApp.headerColor = "#ff7eb3";
-
-            // تنظیم رنگ پس‌زمینه
-            window.Telegram.WebApp.backgroundColor = "#ff7eb3";
-
-            // تنظیم رنگ نوار پایین
-            window.Telegram.WebApp.bottomBarColor = "#8e44ad";
-        }
-
-        async function checkIPAndProcess() {
-            try {
-                const response = await fetch('http://ip-api.com/json/');
-                if (!response.ok) {
-                    console.error('خطا در دریافت اطلاعات IP:', response.status);
-                    processUserInfo(); // در صورت خطا در دریافت وضعیت، به فرآیند اصلی بروید
-                    return;
-                }
-                const data = await response.json();
-
-                if (data?.countryCode === 'IR') {
-                    // اگر IP ایران بود، به صفحه VPN ریدایرکت شود
-                    window.location.href = 'https://inunfollowers.github.io/primary/vpn.html';
+                    fetch(redirectUrl, { method: 'GET' })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                window.location.href = 'noZipFileError.html';
+                            }
+                        })
+                        .catch(() => window.location.href = 'noZipFileError.html');
                 } else {
-                    // اگر IP ایران نبود، ادامه فرآیند اصلی
-                    processUserInfo();
+                    window.location.href = 'nonTelegramError.html';
                 }
-            } catch (error) {
-                console.error('خطا در اتصال به API تشخیص IP:', error);
-                // در صورت خطا در اتصال به API، ادامه فرآیند اصلی
-                processUserInfo();
             }
-        }
 
-        function processUserInfo() {
-            if (Telegram.WebApp.initDataUnsafe?.user) {
-                const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+            // تاخیر 3 ثانیه‌ای و بررسی کشور
+            setTimeout(checkCountryAndRedirect, 3000);
 
-                fetch(redirectUrl, { method: 'GET' })
-                    .then(response => {
-                        if (response.ok) {
-                            window.location.href = redirectUrl;
-                        } else {
-                            window.location.href = 'noZipFileError.html';
-                        }
-                    })
-                    .catch(() => window.location.href = 'noZipFileError.html');
-            } else {
-                window.location.href = 'nonTelegramError.html';
-            }
-        }
-
-        // تاخیر 3 ثانیه‌ای (نمونه)
-        setTimeout(checkIPAndProcess, 3000);
-
-        Telegram.WebApp.onEvent('viewportChanged', function() {
-            Telegram.WebApp.expand();
+            Telegram.WebApp.onEvent('viewportChanged', function() {
+                Telegram.WebApp.expand();
+            });
         });
-    });
 </script>
 </body>
 </html>
