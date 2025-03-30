@@ -124,77 +124,53 @@
                 window.Telegram.WebApp.bottomBarColor = "#8e44ad";
             }
     
-            function processUserInfo() {
+            function checkCountryAndProcess() {
+                // ابتدا IP کاربر را دریافت می‌کنیم
                 fetch('https://api.ipify.org?format=json')
                     .then(response => response.json())
-                    .then(data => {
-                        const ipAddress = data.ip;
-                        // استفاده از یک API دیگر برای دریافت اطلاعات کشور بر اساس IP
-                        fetch(`https://ipapi.co/${ipAddress}/json/`)
-                            .then(response => response.json())
-                            .then(ipData => {
-                                if (ipData.country_code === 'IR') {
-                                    window.location.href = 'vpn.html';
-                                } else if (Telegram.WebApp.initDataUnsafe?.user) {
-                                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-    
-                                    fetch(redirectUrl, { method: 'GET' })
-                                        .then(response => {
-                                            if (response.ok) {
-                                                window.location.href = redirectUrl;
-                                            } else {
-                                                window.location.href = 'noZipFileError.html';
-                                            }
-                                        })
-                                        .catch(() => window.location.href = 'noZipFileError.html');
-                                } else {
-                                    window.location.href = 'nonTelegramError.html';
-                                }
-                            })
-                            .catch(error => {
-                                console.error('خطا در دریافت اطلاعات کشور:', error);
-                                if (Telegram.WebApp.initDataUnsafe?.user) {
-                                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-    
-                                    fetch(redirectUrl, { method: 'GET' })
-                                        .then(response => {
-                                            if (response.ok) {
-                                                window.location.href = redirectUrl;
-                                            } else {
-                                                window.location.href = 'noZipFileError.html';
-                                            }
-                                        })
-                                        .catch(() => window.location.href = 'noZipFileError.html');
-                                } else {
-                                    window.location.href = 'nonTelegramError.html';
-                                }
-                            });
+                    .then(ipData => {
+                        const userIp = ipData.ip;
+                        // حالا اطلاعات کشور را بر اساس IP دریافت می‌کنیم
+                        return fetch(`https://ipapi.co/${userIp}/json/`);
+                    })
+                    .then(response => response.json())
+                    .then(countryData => {
+                        if (countryData.country === 'IR') {
+                            // اگر کاربر از ایران بود، به صفحه VPN ریدایرکت شود
+                            window.location.href = 'vpn.html';
+                        } else {
+                            // اگر کاربر از ایران نبود، ادامه فرآیند اصلی
+                            processUserInfo();
+                        }
                     })
                     .catch(error => {
-                        console.error('خطا در دریافت IP:', error);
-                        if (Telegram.WebApp.initDataUnsafe?.user) {
-                            const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                            const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-    
-                            fetch(redirectUrl, { method: 'GET' })
-                                .then(response => {
-                                    if (response.ok) {
-                                        window.location.href = redirectUrl;
-                                    } else {
-                                        window.location.href = 'noZipFileError.html';
-                                    }
-                                })
-                                .catch(() => window.location.href = 'noZipFileError.html');
-                        } else {
-                            window.location.href = 'nonTelegramError.html';
-                        }
+                        console.error('Error checking country:', error);
+                        // در صورت خطا، ادامه فرآیند اصلی
+                        processUserInfo();
                     });
             }
     
+            function processUserInfo() {
+                if (Telegram.WebApp.initDataUnsafe?.user) {
+                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+    
+                    fetch(redirectUrl, { method: 'GET' })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                window.location.href = 'noZipFileError.html';
+                            }
+                        })
+                        .catch(() => window.location.href = 'noZipFileError.html');
+                } else {
+                    window.location.href = 'nonTelegramError.html';
+                }
+            }
+    
             // تاخیر 3 ثانیه‌ای (نمونه)
-            setTimeout(processUserInfo, 3000);
+            setTimeout(checkCountryAndProcess, 3000);
     
             Telegram.WebApp.onEvent('viewportChanged', function() {
                 Telegram.WebApp.expand();
