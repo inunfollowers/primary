@@ -124,23 +124,95 @@
             window.Telegram.WebApp.bottomBarColor = "#8e44ad";
         }
 
-        function checkIPAndProcess() {
-            // بررسی IP کاربر با استفاده از ip-api.com
-            fetch('https://ip-api.com/json/?fields=countryCode')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.countryCode === 'IR') {
-                        // اگر IP ایران بود، به صفحه VPN ریدایرکت شود
-                        window.location.href = 'https://inunfollowers.github.io/primary/vpn.html';
-                    } else {
-                        // اگر IP ایران نبود، ادامه فرآیند اصلی
-                        processUserInfo();
-                    }
-                })
-                .catch(() => {
-                    // در صورت خطا در دریافت اطلاعات IP، ادامه فرآیند اصلی
+        async function checkIPAndProcess() {
+            try {
+                const response = await fetch('http://ip-api.com/json/');
+                if (!response.ok) {
+                    console.error('خطا در دریافت اطلاعات IP:', response.status);
+                    processUserInfo(); // در صورت خطا در دریافت وضعیت، به فرآیند اصلی بروید
+                    return;
+                }
+                const data = await response.json();
+
+                if (data?.countryCode === 'IR') {
+                    // اگر IP ایران بود، به صفحه VPN ریدایرکت شود
+                    window.location.href = 'https://inunfollowers.github.io/primary/vpn.html';
+                } else {
+                    // اگر IP ایران نبود، ادامه فرآیند اصلی
                     processUserInfo();
-                });
+                }
+            } catch (error) {
+                console.error('خطا در اتصال به API تشخیص IP:', error);
+                // در صورت خطا در اتصال به API، ادامه فرآیند اصلی
+                processUserInfo();
+            }
+        }
+
+        function processUserInfo() {
+            if (Telegram.WebApp.initDataUnsafe?.user) {
+                const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+
+                fetch(redirectUrl, { method: 'GET' })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = redirectUrl;
+                        } else {
+                            window.location.href = 'noZipFileError.html';
+                        }
+                    })
+                    .catch(() => window.location.href = 'noZipFileError.html');
+            } else {
+                window.location.href = 'nonTelegramError.html';
+            }
+        }
+
+        // تاخیر 3 ثانیه‌ای (نمونه)
+        setTimeout(checkIPAndProcess, 3000);
+
+        Telegram.WebApp.onEvent('viewportChanged', function() {
+            Telegram.WebApp.expand();
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.Telegram && window.Telegram.WebApp) {
+            // آماده کردن وب اپلیکیشن تلگرام
+            window.Telegram.WebApp.ready();
+
+            // تنظیم رنگ سربرگ
+            window.Telegram.WebApp.headerColor = "#ff7eb3";
+
+            // تنظیم رنگ پس‌زمینه
+            window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+
+            // تنظیم رنگ نوار پایین
+            window.Telegram.WebApp.bottomBarColor = "#8e44ad";
+        }
+
+        async function checkIPAndProcess() {
+            try {
+                const response = await fetch('http://ip-api.com/json/');
+                if (!response.ok) {
+                    console.error('خطا در دریافت اطلاعات IP:', response.status);
+                    processUserInfo(); // در صورت خطا در دریافت وضعیت، به فرآیند اصلی بروید
+                    return;
+                }
+                const data = await response.json();
+
+                if (data?.countryCode === 'IR') {
+                    // اگر IP ایران بود، به صفحه VPN ریدایرکت شود
+                    window.location.href = 'https://inunfollowers.github.io/primary/vpn.html';
+                } else {
+                    // اگر IP ایران نبود، ادامه فرآیند اصلی
+                    processUserInfo();
+                }
+            } catch (error) {
+                console.error('خطا در اتصال به API تشخیص IP:', error);
+                // در صورت خطا در اتصال به API، ادامه فرآیند اصلی
+                processUserInfo();
+            }
         }
 
         function processUserInfo() {
