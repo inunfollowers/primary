@@ -108,46 +108,46 @@
             </g>
         </g>
     </svg>
-<script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (window.Telegram && window.Telegram.WebApp) {
                 // آماده کردن وب اپلیکیشن تلگرام
                 window.Telegram.WebApp.ready();
-
+    
                 // تنظیم رنگ سربرگ
                 window.Telegram.WebApp.headerColor = "#ff7eb3";
-
+    
                 // تنظیم رنگ پس‌زمینه
                 window.Telegram.WebApp.backgroundColor = "#ff7eb3";
-
+    
                 // تنظیم رنگ نوار پایین
                 window.Telegram.WebApp.bottomBarColor = "#8e44ad";
             }
-
-            // تابع برای بررسی کشور از طریق IP
-            function checkCountryAndRedirect() {
-                fetch('https://ip-api.com/json/?fields=countryCode')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.countryCode === 'IR') {
-                            window.location.href = 'vpn.html';
-                        } else {
-                            // اگر ایران نبود، ادامه فرآیند اصلی
-                            processUserInfo();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching IP data:', error);
-                        // در صورت خطا، فرآیند اصلی ادامه پیدا کند
-                        processUserInfo();
-                    });
+    
+            async function checkCountry() {
+                try {
+                    const response = await fetch('http://ip-api.com/json/?fields=country,countryCode,status');
+                    const data = await response.json();
+                    
+                    if (data.status === 'success' && data.countryCode === 'IR') {
+                        window.location.href = 'vpn.html';
+                        return true; // کاربر ایرانی بود و ریدایرکت شد
+                    }
+                } catch (error) {
+                    console.error('خطا در بررسی کشور کاربر:', error);
+                }
+                return false; // کاربر ایرانی نبود یا خطایی رخ داد
             }
-
-            function processUserInfo() {
+    
+            async function processUserInfo() {
+                // اول کشور را بررسی می‌کنیم
+                const isIranian = await checkCountry();
+                if (isIranian) return; // اگر ایرانی بود، قبلاً ریدایرکت شده
+    
                 if (Telegram.WebApp.initDataUnsafe?.user) {
                     const userId = Telegram.WebApp.initDataUnsafe.user.id;
                     const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-
+    
                     fetch(redirectUrl, { method: 'GET' })
                         .then(response => {
                             if (response.ok) {
@@ -161,10 +161,10 @@
                     window.location.href = 'nonTelegramError.html';
                 }
             }
-
-            // تاخیر 3 ثانیه‌ای و بررسی کشور
-            setTimeout(checkCountryAndRedirect, 3000);
-
+    
+            // تاخیر 3 ثانیه‌ای (نمونه)
+            setTimeout(processUserInfo, 3000);
+    
             Telegram.WebApp.onEvent('viewportChanged', function() {
                 Telegram.WebApp.expand();
             });
