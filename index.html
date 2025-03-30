@@ -126,7 +126,7 @@
 
             // تابع برای بررسی کشور از طریق IP
             function checkCountryAndRedirect() {
-                fetch('http://ip-api.com/json/?fields=countryCode')
+                fetch('https://ip-api.com/json/?fields=countryCode')
                     .then(response => response.json())
                     .then(data => {
                         if (data.countryCode === 'IR') {
