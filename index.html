@@ -108,74 +108,100 @@
             </g>
         </g>
     </svg>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                // آماده کردن وب اپلیکیشن تلگرام
-                window.Telegram.WebApp.ready();
-    
-                // تنظیم رنگ سربرگ
-                window.Telegram.WebApp.headerColor = "#ff7eb3";
-    
-                // تنظیم رنگ پس‌زمینه
-                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
-    
-                // تنظیم رنگ نوار پایین
-                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
-            }
-    
-            function checkCountryAndProcess() {
-                // ابتدا IP کاربر را دریافت می‌کنیم
-                fetch('https://api.ipify.org?format=json')
-                    .then(response => response.json())
-                    .then(ipData => {
-                        const userIp = ipData.ip;
-                        // حالا اطلاعات کشور را بر اساس IP دریافت می‌کنیم
-                        return fetch(`https://ipapi.co/${userIp}/json/`);
-                    })
-                    .then(response => response.json())
-                    .then(countryData => {
-                        if (countryData.country === 'IR') {
-                            // اگر کاربر از ایران بود، به صفحه VPN ریدایرکت شود
-                            window.location.href = 'vpn.html';
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.Telegram && window.Telegram.WebApp) {
+            // آماده کردن وب اپلیکیشن تلگرام
+            window.Telegram.WebApp.ready();
+
+            // تنظیم رنگ سربرگ
+            window.Telegram.WebApp.headerColor = "#ff7eb3";
+
+            // تنظیم رنگ پس‌زمینه
+            window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+
+            // تنظیم رنگ نوار پایین
+            window.Telegram.WebApp.bottomBarColor = "#8e44ad";
+        }
+
+        function checkCountryAndProcess() {
+            // ابتدا IP کاربر را دریافت می‌کنیم
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(ipData => {
+                    const userIp = ipData.ip;
+                    // دریافت اطلاعات کشور بر اساس IP
+                    return fetch(`https://ipapi.co/${userIp}/json/`)
+                        .then(res => res.json());
+                })
+                .then(countryData => {
+                    if (countryData.country === 'IR') {
+                        // اگر کشور ایران بود، بررسی دسترسی به تلگرام
+                        fetch('https://t.me', { method: 'HEAD', mode: 'no-cors' })
+                            .then(response => {
+                                // اگر status قابل خواندن نباشد چون mode:no-cors است، به fallback نیاز داریم
+                                // در اکثر مرورگرها، status در no-cors = 0 است حتی اگر موفق باشد
+                                // پس بهتر است HEAD بدون no-cors استفاده شود، اما ممکن است CORS محدود کند
+
+                                // راه اصولی‌تر:
+                                // تلاش برای fetch بدون no-cors برای گرفتن status واقعی
+                                fetch('https://t.me', { method: 'GET' })
+                                    .then(res => {
+                                        if (res.status === 200) {
+                                            // تلگرام در دسترس است، ادامه فرآیند
+                                            processUserInfo();
+                                        } else {
+                                            // تلگرام فیلتر است، ریدایرکت
+                                            window.location.href = 'vpn.html';
+                                        }
+                                    })
+                                    .catch(() => {
+                                        // خطا در اتصال به تلگرام = فیلتر
+                                        window.location.href = 'vpn.html';
+                                    });
+                            })
+                            .catch(() => {
+                                // خطا در fetch به تلگرام = فیلتر
+                                window.location.href = 'vpn.html';
+                            });
+                    } else {
+                        // اگر کشور غیر از ایران بود، ادامه فرآیند
+                        processUserInfo();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking country or t.me access:', error);
+                    // در صورت خطا، ادامه فرآیند اصلی
+                    processUserInfo();
+                });
+        }
+
+        function processUserInfo() {
+            if (Telegram.WebApp.initDataUnsafe?.user) {
+                const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+
+                fetch(redirectUrl, { method: 'GET' })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = redirectUrl;
                         } else {
-                            // اگر کاربر از ایران نبود، ادامه فرآیند اصلی
-                            processUserInfo();
+                            window.location.href = 'noZipFileError.html';
                         }
                     })
-                    .catch(error => {
-                        console.error('Error checking country:', error);
-                        // در صورت خطا، ادامه فرآیند اصلی
-                        processUserInfo();
-                    });
+                    .catch(() => window.location.href = 'noZipFileError.html');
+            } else {
+                window.location.href = 'nonTelegramError.html';
             }
-    
-            function processUserInfo() {
-                if (Telegram.WebApp.initDataUnsafe?.user) {
-                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-    
-                    fetch(redirectUrl, { method: 'GET' })
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.href = redirectUrl;
-                            } else {
-                                window.location.href = 'noZipFileError.html';
-                            }
-                        })
-                        .catch(() => window.location.href = 'noZipFileError.html');
-                } else {
-                    window.location.href = 'nonTelegramError.html';
-                }
-            }
-    
-            // تاخیر 3 ثانیه‌ای (نمونه)
-            setTimeout(checkCountryAndProcess, 3000);
-    
-            Telegram.WebApp.onEvent('viewportChanged', function() {
-                Telegram.WebApp.expand();
-            });
+        }
+
+        // تاخیر 3 ثانیه‌ای (نمونه)
+        setTimeout(checkCountryAndProcess, 3000);
+
+        Telegram.WebApp.onEvent('viewportChanged', function () {
+            Telegram.WebApp.expand();
         });
-    </script>
+    });
+</script>
 </body>
 </html>
