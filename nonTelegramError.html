@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Restricted Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Glassmorphism Container */
+        .error-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Error Icon */
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Error Message */
+        .error-message {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        /* Error Description */
+        .error-description {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <!-- Error Icon (SVG) -->
+        <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12" y2="16"></line>
+        </svg>
+        <p class="error-message">Oops, Something Went Wrong!</p>
+        <p class="error-description">This page is not accessible. Please try again later or contact support if the issue persists.</p>
+    </div>
+
+    <script>
+        // تابع تشخیص موبایل
+        function isMobileDevice() {
+          return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // تابع نمایش خطا
+        function showError(message) {
+          alert(message);
+        }
+        
+        // تابع ریدایرکت به اینستاگرام
+        function redirectToInstagram() {
+          window.location.replace('http://www.not-allowed.error');
+        }
+        
+        // جلوگیری از کلیک راست و نمایش خطا (فقط در دسکتاپ)
+        if (!isMobileDevice()) {
+          document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            showError('Right-clicking is not allowed on this page!');
+          });
+        }
+        
+        // تشخیص تغییر اندازه پنجره و ریدایرکت (فقط در دسکتاپ)
+        if (!isMobileDevice()) {
+          let devToolsOpened = false;
+          let lastWidth = window.innerWidth;
+          let lastHeight = window.innerHeight;
+        
+          setInterval(() => {
+            const widthThreshold = 160; // حداقل تغییر اندازه برای تشخیص
+            const heightThreshold = 160;
+            const currentWidth = window.innerWidth;
+            const currentHeight = window.innerHeight;
+        
+            if (
+              Math.abs(currentWidth - lastWidth) > widthThreshold ||
+              Math.abs(currentHeight - lastHeight) > heightThreshold
+            ) {
+              if (!devToolsOpened) {
+                devToolsOpened = true;
+                redirectToInstagram();
+              }
+            }
+        
+            lastWidth = currentWidth;
+            lastHeight = currentHeight;
+          }, 500);
+        }
+    </script>
+</body>
+</html>

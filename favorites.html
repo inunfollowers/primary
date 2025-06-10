@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favorites List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    // بررسی کنید که آیا شیء Telegram.WebApp موجود است
+    if (window.Telegram && window.Telegram.WebApp) {
+        // آماده کردن وب اپلیکیشن تلگرام
+        window.Telegram.WebApp.ready();
+
+        // تنظیم رنگ سربرگ
+        window.Telegram.WebApp.headerColor = "#ffffffcc"; // رنگ قرمز
+
+        // تنظیم رنگ پس‌زمینه
+        window.Telegram.WebApp.backgroundColor = "#ffffffcc"; // رنگ سبز
+
+        // تنظیم رنگ نوار پایین
+        window.Telegram.WebApp.bottomBarColor = "#ffffffcc"; // رنگ آبی
+    }
+</script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      /* Applied Comic Relief font to the body */
+      font-family: "Comic Relief", system-ui, Arial, sans-serif;
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #ffffffcc;
+      border-radius: 16px;
+      padding: 30px 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: fadeIn 1s ease;
+      position: relative;
+    }
+
+    .back-link {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        color: #555;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.3s ease;
+        z-index: 10;
+    }
+
+     .back-link svg {
+        fill: currentColor;
+        width: 100%;
+        height: 100%;
+        display: block;
+     }
+
+
+    .back-link:hover {
+        color: #007bff;
+    }
+
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 24px;
+      color: #333;
+      /* Font-weight will use the bold variant from the Comic Relief font */
+      font-weight: 700;
+    }
+
+    .favorites-list {
+      list-style-type: none;
+    }
+
+    .favorite-item {
+      background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .favorite-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .favorite-item a {
+      text-decoration: none;
+      color: #444;
+       /* Font-weight for the link text */
+      font-weight: 400; /* or 700 if you prefer bold links */
+      font-size: 16px;
+      transition: color 0.3s ease;
+      flex-grow: 1;
+      margin-right: 15px;
+    }
+
+    .favorite-item a:hover {
+      color: #007bff;
+    }
+
+    .remove-btn {
+      cursor: pointer;
+      color: #e74c3c;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s ease;
+    }
+
+    .remove-btn svg {
+      fill: currentColor;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .remove-btn:hover {
+      color: #c0392b;
+    }
+
+    /* Removed the specific Comic Relief classes as applying to body is sufficient */
+    /*
+    .comic-relief-regular {
+      font-family: "Comic Relief", system-ui;
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    .comic-relief-bold {
+      font-family: "Comic Relief", system-ui;
+      font-weight: 700;
+      font-style: normal;
+    }
+    */
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px 15px;
+      }
+      .favorite-item {
+        padding: 12px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+       .remove-btn {
+         width: 28px;
+         height: 28px;
+       }
+        .favorite-item a {
+             margin-right: 10px;
+        }
+        .back-link {
+            top: 10px;
+            left: 10px;
+            width: 28px;
+            height: 28px;
+        }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="https://inunfollowers.github.io/primary/" class="back-link" aria-label="Go back">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+      </svg>
+    </a>
+
+    <h1>Favorites List</h1>
+    <ul class="favorites-list" id="favorites-list"></ul>
+  </div>
+
+  <script>
+    let db;
+
+    function openDB() {
+      const request = indexedDB.open('favoritesDB', 1);
+
+      request.onupgradeneeded = function(event) {
+        db = event.target.result;
+        if (!db.objectStoreNames.contains('favorites')) {
+          db.createObjectStore('favorites', { keyPath: 'username' });
+        }
+      };
+
+      request.onsuccess = function(event) {
+        db = event.target.result;
+        loadFavorites();
+      };
+
+      request.onerror = function() {
+        console.error('Database error');
+      };
+    }
+
+    function loadFavorites() {
+      const transaction = db.transaction(['favorites'], 'readonly');
+      const store = transaction.objectStore('favorites');
+      const request = store.getAll();
+
+      request.onsuccess = function(event) {
+        const favorites = event.target.result;
+        displayFavorites(favorites);
+      };
+    }
+
+    function displayFavorites(favorites) {
+      const favoritesList = document.getElementById('favorites-list');
+      favoritesList.innerHTML = '';
+
+      if (favorites.length === 0) {
+        const noFavoritesMessage = document.createElement('li');
+        noFavoritesMessage.textContent = 'No favorites found.';
+        noFavoritesMessage.style.textAlign = 'center';
+        noFavoritesMessage.style.fontStyle = 'italic';
+        noFavoritesMessage.style.color = '#666';
+        favoritesList.appendChild(noFavoritesMessage);
+      } else {
+        favorites.forEach(favorite => {
+          const li = document.createElement('li');
+          li.className = 'favorite-item';
+
+          const usernameLink = document.createElement('a');
+          usernameLink.href = `https://instagram.com/${favorite.username}`;
+          usernameLink.target = '_blank';
+          usernameLink.textContent = favorite.username;
+
+          const removeBtn = document.createElement('span');
+          removeBtn.className = 'remove-btn';
+          removeBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          `;
+          removeBtn.onclick = () => removeFavorite(favorite.username);
+
+          li.appendChild(usernameLink);
+          li.appendChild(removeBtn);
+
+          favoritesList.appendChild(li);
+        });
+      }
+    }
+
+    function removeFavorite(username) {
+      const transaction = db.transaction(['favorites'], 'readwrite');
+      const store = transaction.objectStore('favorites');
+      store.delete(username);
+
+      transaction.oncomplete = function() {
+        loadFavorites();
+      };
+
+      transaction.onerror = function() {
+        console.error('Error deleting favorite');
+      };
+    }
+
+    openDB();
+  </script>
+
+</body>
+</html>

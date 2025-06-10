@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیام وضعیت</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                #ff7eb3 0px,
+                #ff7eb3 20px,
+                rgba(255, 126, 179, 0.95) 20.001px,
+                rgba(142, 68, 173, 0.95) calc(100% - 20.001px),
+                #8e44ad calc(100% - 20px),
+                #8e44ad 100%
+            );
+            font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+            direction: rtl;
+            padding: 20px;
+        }
+
+        .glass-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            padding: 35px 30px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .message-text {
+            color: #ffffff;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .message-text + .message-text {
+            margin-top: 0.6em;
+        }
+
+        @media (max-width: 360px) {
+            .glass-box {
+                padding: 30px 20px;
+            }
+            .message-text {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-box">
+        <p class="message-text">خوش به حالت رفیق!</p>
+        <p class="message-text">کسی آنفالوت نکرده.</p>
+    </div>
+
+</body>
+</html>

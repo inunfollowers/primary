@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No File Found!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(
+                to bottom,
+                #ff7eb3 0px,          /* نوار بالا شروع */
+                #ff7eb3 20px,         /* نوار بالا پایان */
+                #ff7eb3 20.001px,     /* شروع نرم گرادینت */
+                #8e44ad calc(100% - 20.001px), /* پایان گرادینت */
+                #8e44ad calc(100% - 20px),     /* نوار پایین شروع */
+                #8e44ad 100%          /* نوار پایین پایان */
+            );
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            direction: rtl;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            margin: 2rem;
+            opacity: 0;
+            animation: fade-in 0.8s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .help-button {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .help-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .error-icon i {
+            color: #fff;
+            filter: drop-shadow(0 0 0.3rem rgba(0, 0, 0, 0.5));
+        }
+
+        .error-icon i.fa-file-upload {
+            animation: pulse 2s infinite;
+        }
+
+        .error-message {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fade-in 0.8s 0.3s ease-out forwards;
+        }
+
+        .error-description {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            opacity: 0;
+            animation: fade-in 0.8s 0.5s ease-out forwards;
+            margin-bottom: 2rem;
+        }
+
+        .text-button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .text-button {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .text-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .error-icon {
+                font-size: 3rem;
+            }
+
+            .error-message {
+                font-size: 1.8rem;
+            }
+
+            .error-description {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .help-button, .text-button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .text-button-container {
+                flex-direction: column;
+                gap: 0.7rem;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">
+            <i class="fas fa-file-upload"></i>
+        </div>
+        <p class="error-message">هنوز فایلی ارسال نکرده‌اید!</p>
+        <p class="error-description">برای استفاده از این صفحه، ابتدا یک فایل zip از طریق همین ربات تلگرام ارسال کنید.</p>
+
+        <div class="text-button-container">
+            <a href="https://t.me/inunfollowersbot?start=unfollowers" class="help-button">راهنما</a>
+            <div class="text-button" id="faqButton">سوالات متداول</div>
+            <div class="text-button" id="demoButton">اجرای آزمایشی</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("✅ DOM کاملاً لود شد."); // بررسی اجرای اسکریپت
+    
+            document.getElementById('faqButton').addEventListener('click', function() {
+                console.log("✅ دکمه FAQ کلیک شد!"); // بررسی کلیک
+                window.location.assign('faq.html');
+            });
+    
+            document.getElementById('demoButton').addEventListener('click', function() {
+                console.log("✅ دکمه Demo کلیک شد!"); // بررسی کلیک
+                window.location.assign('demo.html');
+            });
+        });
+    </script>
+</body>
+</html>

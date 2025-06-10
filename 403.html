@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 403 - Forbidden</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                #ff7eb3 0px,
+                #ff7eb3 20px,
+                #ff7eb3 20.001px,
+                #8e44ad calc(100% - 20.001px),
+                #8e44ad calc(100% - 20px),
+                #8e44ad 100%
+            );
+            font-family: "Winky Sans", sans-serif;
+        }
+
+        .error-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 30px;
+            text-align: center;
+            color: #fff;
+            max-width: 85%;
+            width: auto;
+            box-sizing: border-box;
+            font-family: "Winky Sans", sans-serif;
+        }
+
+        .error-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-family: "Winky Sans", sans-serif;
+        }
+
+        .error-message {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-family: "Winky Sans", sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-title">403 Forbidden!</div>
+        <div class="error-message">Your access to this page is prohibited!</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                // آماده کردن وب اپلیکیشن تلگرام
+                window.Telegram.WebApp.ready();
+
+                // تنظیم رنگ سربرگ
+                window.Telegram.WebApp.headerColor = "#ff7eb3";
+
+                // تنظیم رنگ پس‌زمینه
+                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+
+                // تنظیم رنگ نوار پایین
+                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                #ff7eb3 0px,          /* نوار بالا شروع */
+                #ff7eb3 20px,         /* نوار بالا پایان */
+                #ff7eb3 20.001px,     /* شروع نرم گرادینت */
+                #8e44ad calc(100% - 20.001px), /* پایان گرادینت */
+                #8e44ad calc(100% - 20px),     /* نوار پایین شروع */
+                #8e44ad 100%          /* نوار پایین پایان */
+            );
+        }
+
+        .pl1 {
+            display: block;
+            width: 8em;
+            height: 8em;
+        }
+
+        .pl1__g,
+        .pl1__rect {
+            animation: pl1-a 1.5s cubic-bezier(0.65,0,0.35,1) infinite;
+        }
+
+        .pl1__g {
+            transform-origin: 64px 64px;
+        }
+
+        .pl1__rect:first-child {
+            animation-name: pl1-b;
+        }
+
+        .pl1__rect:nth-child(2) {
+            animation-name: pl1-c;
+        }
+
+        @keyframes pl1-a {
+            from { transform: rotate(0); }
+            80%, to { animation-timing-function: steps(1,start); transform: rotate(90deg); }
+        }
+
+        @keyframes pl1-b {
+            from { animation-timing-function: cubic-bezier(0.33,0,0.67,0); width: 40px; height: 40px; }
+            20% { animation-timing-function: steps(1,start); width: 40px; height: 0; }
+            60% { animation-timing-function: cubic-bezier(0.65,0,0.35,1); width: 0; height: 40px; }
+            80%, to { width: 40px; height: 40px; }
+        }
+
+        @keyframes pl1-c {
+            from { animation-timing-function: cubic-bezier(0.33,0,0.67,0); width: 40px; height: 40px; transform: translate(0,48px); }
+            20% { animation-timing-function: cubic-bezier(0.33,1,0.67,1); width: 40px; height: 88px; transform: translate(0,0); }
+            40% { animation-timing-function: cubic-bezier(0.33,0,0.67,0); width: 40px; height: 40px; transform: translate(0,0); }
+            60% { animation-timing-function: cubic-bezier(0.33,1,0.67,1); width: 88px; height: 40px; transform: translate(0,0); }
+            80%, to { width: 40px; height: 40px; transform: translate(48px,0); }
+        }
+    </style>
+</head>
+<body>
+    <svg height="128px" width="128px" viewBox="0 0 128 128" class="pl1">
+        <defs>
+            <linearGradient y2="1" x2="1" y1="0" x1="0" id="pl-grad">
+                <stop stop-color="#000" offset="0%"></stop>
+                <stop stop-color="#fff" offset="100%"></stop>
+            </linearGradient>
+            <mask id="pl-mask">
+                <rect fill="url(#pl-grad)" height="128" width="128" y="0" x="0"></rect>
+            </mask>
+        </defs>
+        <g fill="var(--primary)">
+            <g class="pl1__g">
+                <g transform="translate(20,20) rotate(0,44,44)">
+                    <g class="pl1__rect-g">
+                        <rect height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                        <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                    </g>
+                    <g transform="rotate(180,44,44)" class="pl1__rect-g">
+                        <rect height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                        <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                    </g>
+                </g>
+            </g>
+        </g>
+        <g mask="url(#pl-mask)" fill="hsl(343,90%,50%)">
+            <g class="pl1__g">
+                <g transform="translate(20,20) rotate(0,44,44)">
+                    <g class="pl1__rect-g">
+                        <rect height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                        <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                    </g>
+                    <g transform="rotate(180,44,44)" class="pl1__rect-g">
+                        <rect height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                        <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" class="pl1__rect"></rect>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </svg>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                // آماده کردن وب اپلیکیشن تلگرام
+                window.Telegram.WebApp.ready();
+    
+                // تنظیم رنگ سربرگ
+                window.Telegram.WebApp.headerColor = "#ff7eb3";
+    
+                // تنظیم رنگ پس‌زمینه
+                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+    
+                // تنظیم رنگ نوار پایین
+                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
+            }
+    
+            function checkCountryAndProcess() {
+                // ابتدا IP کاربر را دریافت می‌کنیم
+                fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(ipData => {
+                        const userIp = ipData.ip;
+                        // حالا اطلاعات کشور را بر اساس IP دریافت می‌کنیم
+                        return fetch(`https://ipapi.co/${userIp}/json/`);
+                    })
+                    .then(response => response.json())
+                    .then(countryData => {
+                        if (countryData.country === 'IR') {
+                            // اگر کاربر از ایران بود، به صفحه VPN ریدایرکت شود
+                            window.location.href = 'vpn.html';
+                        } else {
+                            // اگر کاربر از ایران نبود، ادامه فرآیند اصلی
+                            processUserInfo();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking country:', error);
+                        // در صورت خطا، ادامه فرآیند اصلی
+                        processUserInfo();
+                    });
+            }
+    
+            function processUserInfo() {
+                if (Telegram.WebApp.initDataUnsafe?.user) {
+                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+    
+                    fetch(redirectUrl, { method: 'GET' })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                window.location.href = 'noZipFileError.html';
+                            }
+                        })
+                        .catch(() => window.location.href = 'noZipFileError.html');
+                } else {
+                    window.location.href = 'nonTelegramError.html';
+                }
+            }
+    
+            // تاخیر 3 ثانیه‌ای (نمونه)
+            setTimeout(checkCountryAndProcess, 3000);
+    
+            Telegram.WebApp.onEvent('viewportChanged', function() {
+                Telegram.WebApp.expand();
+            });
+        });
+    </script>
+</body>
+</html>

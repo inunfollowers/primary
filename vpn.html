@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Error - IP Iran!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        
+        body {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            color: white;
+            padding: 20px;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .glass-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            text-align: center;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .icon {
+            width: clamp(70px, 20vw, 100px);
+            height: clamp(70px, 20vw, 100px);
+            margin: 0 auto 20px;
+            display: block;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        
+        .snow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* استایل دکمه شیشه‌ای */
+        .glass-button {
+            display: inline-block;
+            padding: 12px 30px;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .glass-container {
+                padding: 25px 20px;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                margin-bottom: 10px;
+            }
+
+            .glass-button {
+                padding: 10px 25px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="snow" id="snow"></div>
+    
+    <div class="glass-container">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" stroke="white" stroke-width="8" fill="none"/>
+            <path d="M25,25 L75,75" stroke="white" stroke-width="8" stroke-linecap="round"/>
+            <path d="M75,25 L25,75" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        </svg>
+        
+        <h1>هی رفیق!</h1>
+        <p>یه فیلترشکن بزن تا همه چی درست شه.</p>
+        
+        <!-- دکمه تازه‌سازی -->
+        <a href="https://inunfollowers.github.io/primary/" class="glass-button">تازه‌سازی</a>
+    </div>
+
+    <script>
+        // ایجاد افکت برف
+        function createSnow() {
+            const snowContainer = document.getElementById('snow');
+            const snowflakeCount = window.innerWidth < 768 ? 50 : 100;
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                
+                // اندازه تصادفی
+                const size = Math.random() * (window.innerWidth < 768 ? 6 : 8) + 2;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                
+                // موقعیت شروع تصادفی
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                snowflake.style.top = `${Math.random() * -100}px`;
+                
+                // مدت زمان سقوط تصادفی
+                const duration = Math.random() * 10 + 5;
+                snowflake.style.animationDuration = `${duration}s`;
+                
+                // تأخیر شروع تصادفی
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                
+                // شفافیت تصادفی
+                snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+                
+                snowContainer.appendChild(snowflake);
+            }
+        }
+        
+        // اجرای اسکریپت پس از لود صفحه
+        window.addEventListener('load', createSnow);
+    </script>
+</body>
+</html>
