@@ -188,5 +188,303 @@
             });
         });
     </script>
+
+    <script>
+// تابع تشخیص موبایل
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// تابع نمایش پیام خطا
+function showError(message) {
+  if (document.querySelector('.error')) return; // جلوگیری از تکرار ارور همزمان
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error';
+
+  const errorIcon = document.createElement('div');
+  errorIcon.className = 'error__icon';
+  errorIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="#fff" d="M13 13h-2V7h2v6zm0 4h-2v-2h2v2zm-1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>`;
+  errorDiv.appendChild(errorIcon);
+
+  const errorTitle = document.createElement('div');
+  errorTitle.className = 'error__title';
+  errorTitle.textContent = message;
+  errorDiv.appendChild(errorTitle);
+
+  const errorClose = document.createElement('div');
+  errorClose.className = 'error__close';
+  errorClose.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="#fff" d="M14.348 5.652l-1.41-1.41L10 7.59 7.062 4.652l-1.41 1.41L8.59 10l-2.938 2.938 1.41 1.41L10 12.41l2.938 2.938 1.41-1.41L11.41 10l2.938-2.938z"/></svg>`;
+  errorClose.addEventListener('click', () => {
+    errorDiv.classList.add('fade-out');
+    setTimeout(() => errorDiv.remove(), 300);
+  });
+  errorDiv.appendChild(errorClose);
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .error {
+      font-family: system-ui, sans-serif;
+      width: 320px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      background: #EF665B;
+      border-radius: 8px;
+      box-shadow: 0px 0px 5px -3px #111;
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      animation: slide-in 0.5s forwards;
+    }
+    @keyframes slide-in {
+      to { top: 20px; }
+    }
+    .fade-out {
+      animation: slide-out 0.3s forwards;
+    }
+    @keyframes slide-out {
+      to { top: -100px; opacity: 0; }
+    }
+    .error__icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+    .error__title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+    }
+    .error__close {
+      margin-left: auto;
+      cursor: pointer;
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(errorDiv);
+
+  setTimeout(() => {
+    if (document.body.contains(errorDiv)) {
+      errorDiv.classList.add('fade-out');
+      setTimeout(() => errorDiv.remove(), 300);
+    }
+  }, 5000);
+}
+
+// جلوگیری از راست‌کلیک با ارور
+if (!isMobileDevice()) {
+  document.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+    showError('Right-clicking is not allowed!');
+  });
+}
+
+// جلوگیری از انتخاب متن (بدون ارور) و حذف هایلایت آبی موبایل
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('*').forEach(el => {
+    el.style.userSelect = "none";
+    el.style.webkitUserSelect = "none";
+    el.style.msUserSelect = "none";
+    el.style.MozUserSelect = "none";
+    el.style.webkitTapHighlightColor = "transparent";
+  });
+});
+
+// جلوگیری کامل از کلیدها (هم تکی هم ترکیبی) با ارور
+document.addEventListener('keydown', function(event) {
+  const forbiddenKeys = [
+    "Control", "Shift", "Alt", "Meta", "Tab",
+    "F1", "F2", "F3", "F4", "F5", "F6",
+    "F7", "F8", "F9", "F10", "F11", "F12"
+  ];
+
+  // اگر کلید اصلی یا یکی از ترکیب‌ها ممنوع بود
+  if (
+    forbiddenKeys.includes(event.key) || 
+    event.ctrlKey || 
+    event.altKey || 
+    event.metaKey || 
+    event.shiftKey
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    showError(`${event.key} is not allowed!`);
+  }
+}, true);
+</script>
+
+
+
+
+<script>
+// تابع تشخیص موبایل
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// تابع ریدایرکت به آدرس ساختگی
+function redirectToInstagram() {
+  if (!window.__devtoolsBypass) {
+    window.location.replace('https://google.com');
+  }
+}
+
+// --- DevTools Block Variables ---
+let lastWidth = window.innerWidth;
+let lastHeight = window.innerHeight;
+
+// --- Developer Hidden Bypass ---
+let spacePressTimes = [];
+window.__devtoolsBypass = false;
+
+window.addEventListener('keydown', function(e) {
+  if (e.code === 'Space') {
+    const now = Date.now();
+    spacePressTimes.push(now);
+    if (spacePressTimes.length > 10) spacePressTimes = spacePressTimes.slice(-10);
+    if (spacePressTimes.length === 10) {
+      let isFast = true;
+      for (let i = 1; i < 10; i++) {
+        if (spacePressTimes[i] - spacePressTimes[i - 1] > 300) {
+          isFast = false;
+          break;
+        }
+      }
+      if (isFast) {
+        window.__devtoolsBypass = true;
+        try {
+          if (window.__devtoolsIntervals) {
+            window.__devtoolsIntervals.forEach(clearInterval);
+          }
+        } catch {}
+        window.removeEventListener('resize', detectDevTools);
+        window.removeEventListener('blur', blurListener);
+        alert('Developer mode activated: DevTools restrictions disabled!');
+      }
+    }
+  } else {
+    spacePressTimes = [];
+  }
+});
+
+// --- DevTools Block Functions ---
+function detectDevTools() {
+  if (window.__devtoolsBypass) return;
+  const threshold = 160;
+  if (
+    window.innerWidth < window.outerWidth - threshold ||
+    window.innerHeight < window.outerHeight - threshold
+  ) {
+    redirectToInstagram();
+  }
+}
+function blurListener() {
+  if (window.__devtoolsBypass) return;
+  setTimeout(() => {
+    if (document.hasFocus() === false) {
+      redirectToInstagram();
+    }
+  }, 200);
+}
+
+// فقط در دسکتاپ اجرا شود
+if (!isMobileDevice()) {
+  window.__devtoolsIntervals = [];
+
+  // مانیتور سایز پنجره و تفاوت outer و inner برای تشخیص DevTools
+  window.__devtoolsIntervals.push(setInterval(() => {
+    if (window.__devtoolsBypass) return;
+    const threshold = 160;
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+    if (
+      Math.abs(currentWidth - lastWidth) > threshold ||
+      Math.abs(currentHeight - lastHeight) > threshold ||
+      window.outerWidth - window.innerWidth > threshold ||
+      window.outerHeight - window.innerHeight > threshold
+    ) {
+      redirectToInstagram();
+    }
+    lastWidth = currentWidth;
+    lastHeight = currentHeight;
+  }, 1000)); // کاهش دفعات اجرا برای بهبود عملکرد
+
+  // تشخیص با debugger (با interval کمتر و حلقه سبک‌تر)
+  window.__devtoolsIntervals.push(setInterval(function() {
+    if (window.__devtoolsBypass) return;
+    const start = performance.now();
+    debugger;
+    if (performance.now() - start > 150) { // آستانه کمی بالا برده شده
+      redirectToInstagram();
+    }
+  }, 1500));
+
+  // تشخیص باز شدن کنسول توسط inspectElement (فقط یکبار اجرا)
+  (function() {
+    let element = new Image();
+    Object.defineProperty(element, 'id', {
+      get: function() {
+        if (!window.__devtoolsBypass) redirectToInstagram();
+      }
+    });
+    // تاخیر انداختن اجرا برای جلوگیری از کند شدن لود اولیه
+    setTimeout(() => {
+      console.log('%c', element);
+    }, 1200);
+  })();
+
+  // مانیتور blur صفحه
+  window.addEventListener('blur', blurListener);
+
+  // مانیتور تغییرات غیرمعمول در window (interval کمتر)
+  window.__devtoolsIntervals.push(setInterval(function() {
+    if (window.__devtoolsBypass) return;
+    if (window.chrome && window.chrome.devtools) {
+      redirectToInstagram();
+    }
+    if (window.devtools && window.devtools.open) {
+      redirectToInstagram();
+    }
+    if (window.__VUE_DEVTOOLS_GLOBAL_HOOK__ || window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+      redirectToInstagram();
+    }
+  }, 2000));
+
+  // تشخیص تغییرات در فونت کنسول (فقط هر ۲ ثانیه یکبار)
+  const checkConsoleFont = () => {
+    if (window.__devtoolsBypass) return;
+    const elem = document.createElement('div');
+    elem.innerHTML = 'Test';
+    elem.style.fontSize = '100px';
+    elem.style.position = 'fixed';
+    elem.style.top = '-9999px';
+    document.body.appendChild(elem);
+    const fontSize = window.getComputedStyle(elem).getPropertyValue('font-size');
+    document.body.removeChild(elem);
+    if (parseInt(fontSize) !== 100) {
+      redirectToInstagram();
+    }
+  };
+  window.__devtoolsIntervals.push(setInterval(checkConsoleFont, 2000));
+
+  // تشخیص کند شدن حلقه سنگین (کاهش دفعات اجرا و حلقه سبک‌تر)
+  const detectSlowLoop = () => {
+    if (window.__devtoolsBypass) return;
+    let t1 = performance.now();
+    for (let i = 0; i < 500000; i++) {} // حلقه نصف حالت قبلی
+    let t2 = performance.now();
+    if (t2 - t1 > 150) { // آستانه کمی بالا برده شده
+      redirectToInstagram();
+    }
+  };
+  window.__devtoolsIntervals.push(setInterval(detectSlowLoop, 2500));
+
+  // مانیتور resize
+  window.addEventListener('resize', detectDevTools);
+}
+</script>
 </body>
 </html>
