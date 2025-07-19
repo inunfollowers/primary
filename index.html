@@ -108,75 +108,49 @@
             </g>
         </g>
     </svg>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                // آماده کردن وب اپلیکیشن تلگرام
-                window.Telegram.WebApp.ready();
-    
-                // تنظیم رنگ سربرگ
-                window.Telegram.WebApp.headerColor = "#ff7eb3";
-    
-                // تنظیم رنگ پس‌زمینه
-                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
-    
-                // تنظیم رنگ نوار پایین
-                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
-            }
-    
-            function checkCountryAndProcess() {
-                // ابتدا IP کاربر را دریافت می‌کنیم
-                fetch('https://api.ipify.org?format=json')
-                    .then(response => response.json())
-                    .then(ipData => {
-                        const userIp = ipData.ip;
-                        // حالا اطلاعات کشور را بر اساس IP دریافت می‌کنیم
-                        return fetch(`https://ipapi.co/${userIp}/json/`);
-                    })
-                    .then(response => response.json())
-                    .then(countryData => {
-                        if (countryData.country === 'IR') {
-                            // اگر کاربر از ایران بود، به صفحه VPN ریدایرکت شود
-                            window.location.href = 'vpn.html';
-                        } else {
-                            // اگر کاربر از ایران نبود، ادامه فرآیند اصلی
-                            processUserInfo();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error checking country:', error);
-                        // در صورت خطا، ادامه فرآیند اصلی
-                        processUserInfo();
-                    });
-            }
-    
-            function processUserInfo() {
-                if (Telegram.WebApp.initDataUnsafe?.user) {
-                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                    const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
-    
-                    fetch(redirectUrl, { method: 'GET' })
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.href = redirectUrl;
-                            } else {
-                                window.location.href = 'noZipFileError.html';
-                            }
-                        })
-                        .catch(() => window.location.href = 'noZipFileError.html');
-                } else {
-                    window.location.href = 'nonTelegramError.html';
-                }
-            }
-    
-            // تاخیر 3 ثانیه‌ای (نمونه)
-            setTimeout(checkCountryAndProcess, 3000);
-    
-            Telegram.WebApp.onEvent('viewportChanged', function() {
-                Telegram.WebApp.expand();
-            });
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function processUserInfo() {
+            const userId = Telegram.WebApp.initDataUnsafe.user.id;
+            const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+
+            fetch(redirectUrl, { method: 'GET' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = redirectUrl;
+                    } else {
+                        window.location.href = 'noZipFileError.html';
+                    }
+                })
+                .catch(() => window.location.href = 'noZipFileError.html');
+        }
+
+        // بررسی اول: آیا کاربر از طریق تلگرام وارد شده؟
+        if (!Telegram?.WebApp?.initDataUnsafe?.user) {
+            window.location.href = 'nonTelegramError.html';
+            return;
+        }
+
+        // بررسی دوم: آیا Telegram.WebApp در دسترس است؟
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            window.location.href = 'vpn.html';
+            return;
+        }
+
+        // ادامه فرایند در صورتی که شرایط بالا درست باشد
+        Telegram.WebApp.ready();
+        Telegram.WebApp.headerColor = "#ff7eb3";
+        Telegram.WebApp.backgroundColor = "#ff7eb3";
+        Telegram.WebApp.bottomBarColor = "#8e44ad";
+
+        setTimeout(processUserInfo, 3000);
+
+        Telegram.WebApp.onEvent('viewportChanged', function () {
+            Telegram.WebApp.expand();
         });
-    </script>
+    });
+</script>
+
 
 
     <script>
