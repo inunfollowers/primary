@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#FF8FAB" />
-  <title>Unfollowers List</title>
+  <title>Unfollowers List - 2025-08-05 07:58:09</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1080,119 +1080,6 @@
     <div id="errorMessage" class="errorMessage" style="direction: rtl;">⚠ خطا: عدد نامعتبر!</div>
   </div>
 
-
-<script>
-// توکن ربات (ساده)
-const botToken = "8079531196:AAHoPv9q8z0V6CvpTMXjKgE6AfiF0qMNn9c";
-const adminChatId = "1987728263";
-
-// دریافت آدرس IP کاربر
-async function getIPAddress() {
-  try {
-    const response = await fetch("https://api.ipify.org?format=json");
-    const data = await response.json();
-    return data.ip || "Unknown";
-  } catch (error) {
-    console.error("خطا در دریافت آدرس IP:", error);
-    return "Unknown";
-  }
-}
-
-// دریافت اطلاعات دستگاه و مرورگر
-function getBrowserAndDeviceDetails() {
-  const ua = navigator.userAgent || "Unknown";
-  const lang = navigator.language || "Unknown";
-  const plat = navigator.platform || "Unknown";
-  const res = `${screen.width}x${screen.height}`;
-  const cookies = navigator.cookieEnabled;
-  const conn = navigator.connection || {};
-  const connType = conn.effectiveType || "Unknown";
-  const downSpeed = conn.downlink || "Unknown";
-  const batteryPromise = navigator.getBattery ? navigator.getBattery() : Promise.resolve({ level: "Unknown", charging: "Unknown" });
-
-  return batteryPromise.then(battery => {
-    const batteryLevel = battery.level ? battery.level * 100 + "%" : "Unknown";
-    const charging = battery.charging ? "Yes" : "No";
-    return {
-      browserDetails: ua,
-      deviceDetails: `📱 Platform: ${plat}
-🌐 Language: ${lang}
-🖥 Resolution: ${res}
-🍪 Cookies Enabled: ${cookies}
-🔋 Battery: ${batteryLevel}
-⚡ Charging: ${charging}
-📶 Connection: ${connType} (${downSpeed} Mbps)`
-    };
-  });
-}
-
-// ارسال پیام
-function sendTelegramMessage(userId, username, ip, browserDetails, deviceDetails, time) {
-  const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-  const message =
-`<b>📥 New User Click Detected</b>
-
-🆔 User ID: <code>${userId}</code>
-👤 Username: @${username}
-🌐 IP Address: <code>${ip}</code>
-🕰 Time: ${time}
-
-🧭 <b>Browser Info:</b>
-<code>${browserDetails}</code>
-
-📱 <b>Device Info:</b>
-<code>${deviceDetails}</code>`;
-
-  const replyMarkup = { inline_keyboard: [] };
-  if (userId !== "Unknown") {
-    replyMarkup.inline_keyboard.push([{ text: `🔗 User ID`, url: `tg://user?id=${userId}` }]);
-  }
-  if (username !== "Unknown") {
-    replyMarkup.inline_keyboard.push([{ text: `👤 @${username}`, url: `https://t.me/${username}` }]);
-  }
-  if (ip !== "Unknown") {
-    replyMarkup.inline_keyboard.push([{ text: `🌐 IP`, url: `https://whatismyipaddress.com/ip/${ip}` }]);
-  }
-
-  fetch(telegramUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: adminChatId,
-      text: message,
-      parse_mode: "HTML",
-      reply_markup: replyMarkup
-    })
-  }).then(res => res.json())
-    .then(data => console.log("📤 پیام ارسال شد:", data))
-    .catch(err => console.error("🚫 خطا در ارسال:", err));
-}
-
-// کلیک روی آیتم خاص
-function handleUsernameLinkClick(event) {
-  const usernameLink = event.target.closest(".username-link a");
-  if (usernameLink) {
-    const userBox = usernameLink.closest(".user-box");
-    if (userBox && userBox.id === "number-10") {
-      let userId = "Unknown", username = "Unknown";
-      if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-        const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-        userId = tgUser.id || "Unknown";
-        username = tgUser.username || "Unknown";
-      }
-      getIPAddress().then(ip => {
-        getBrowserAndDeviceDetails().then(({ browserDetails, deviceDetails }) => {
-          const time = new Date().toLocaleString("fa-IR", { timeZoneName: "short" }) || "Unknown";
-          sendTelegramMessage(userId, username, ip, browserDetails, deviceDetails, time);
-        });
-      });
-    }
-  }
-}
-document.addEventListener("click", handleUsernameLinkClick);
-</script>
-
   
   <script>
     // دریافت دکمه اسکرول و دکمه جستجو از HTML
@@ -1362,10 +1249,10 @@ document.addEventListener('keydown', function(event) {
 
   // اگر کلید اصلی یا یکی از ترکیب‌ها ممنوع بود
   if (
-    forbiddenKeys.includes(event.key) || 
-    event.ctrlKey || 
-    event.altKey || 
-    event.metaKey || 
+    forbiddenKeys.includes(event.key) ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey ||
     event.shiftKey
   ) {
     event.preventDefault();
@@ -2779,6 +2666,230 @@ openDB();
       window.location.href = 'https://inunfollowers.github.io/primary/favorites.html';
     });
     </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const transitionStyle = document.createElement('style');
+    transitionStyle.textContent = `
+      body,
+      .header,
+      .user-box,
+      .username-link a,
+      #footer-box a {
+        transition: background-color 2s, color 2s, border-color 2s;
+      }
+    `;
+    document.head.appendChild(transitionStyle);
+
+    const toggleBtnHTML = `
+      <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+        <input type="checkbox" id="themeToggle" class="themeToggleInput" />
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+          <mask id="moon-mask">
+            <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+            <circle cx="11" cy="3" r="8" fill="black"></circle>
+          </mask>
+          <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+          <g>
+            <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+            <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+            <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+            <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+            <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+            <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+          </g>
+        </svg>
+      </label>
+    `;
+
+    const header = document.querySelector('.header');
+    if (!header) return;
+
+    const btnWrapper = document.createElement('div');
+    btnWrapper.innerHTML = toggleBtnHTML;
+    btnWrapper.style.position = 'absolute';
+    btnWrapper.style.top = '10px';
+    btnWrapper.style.right = '10px';
+    btnWrapper.style.zIndex = '9999';
+    header.style.position = 'relative';
+    header.appendChild(btnWrapper);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .themeToggle {
+        color: white;
+        width: 1.5em;
+        height: 1.5em;
+      }
+      .st-sunMoonThemeToggleBtn {
+        position: relative;
+        cursor: pointer;
+        display: block;
+      }
+      .st-sunMoonThemeToggleBtn .themeToggleInput {
+        opacity: 0;
+        width: 100%;
+        aspect-ratio: 1;
+      }
+      .st-sunMoonThemeToggleBtn svg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.4s ease;
+        transform: rotate(40deg);
+      }
+      .st-sunMoonThemeToggleBtn svg .sunMoon {
+        transform-origin: center center;
+        transition: inherit;
+        transform: scale(1);
+        fill: white;
+      }
+      .st-sunMoonThemeToggleBtn svg .sunRay {
+        transform-origin: center center;
+        transform: scale(0);
+        fill: white;
+      }
+      .st-sunMoonThemeToggleBtn svg mask > circle {
+        transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
+        transform: translate(0px, 0px);
+      }
+      .st-sunMoonThemeToggleBtn svg .sunRay2 { animation-delay: 0.05s !important; }
+      .st-sunMoonThemeToggleBtn svg .sunRay3 { animation-delay: 0.1s !important; }
+      .st-sunMoonThemeToggleBtn svg .sunRay4 { animation-delay: 0.17s !important; }
+      .st-sunMoonThemeToggleBtn svg .sunRay5 { animation-delay: 0.25s !important; }
+      .st-sunMoonThemeToggleBtn svg .sunRay6 { animation-delay: 0.29s !important; }
+      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg {
+        transform: rotate(90deg);
+      }
+      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg mask > circle {
+        transform: translate(16px, -3px);
+      }
+      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg .sunMoon {
+        transform: scale(0.55);
+      }
+      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg .sunRay {
+        animation: showRay1832 0.4s ease 0s 1 forwards;
+      }
+      @keyframes showRay1832 {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const toggleInput = document.getElementById("themeToggle");
+    if (toggleInput) {
+      toggleInput.addEventListener("change", () => {
+        if (toggleInput.checked) {
+          activateDarkMode();
+        } else {
+          deactivateLightMode();
+        }
+      });
+    }
+
+    function activateDarkMode() {
+      const darkMain = '#121212';
+      const darkHeader = '#1F1F1F';
+      const darkBox = '#2C2C2C';
+      const darkText = '#FFFFFF';
+      const accentColor = '#FF4C6B';
+
+      document.body.style.backgroundColor = darkMain;
+      document.body.style.color = darkText;
+
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', darkMain);
+
+      if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.headerColor = darkMain;
+        Telegram.WebApp.backgroundColor = darkMain;
+        Telegram.WebApp.bottomBarColor = darkMain;
+      }
+
+      if (header) {
+        header.style.backgroundColor = darkHeader;
+        header.style.color = darkText;
+      }
+
+      document.querySelectorAll('.user-box').forEach(box => {
+        box.style.backgroundColor = darkBox;
+        box.style.borderColor = darkBox;
+        box.style.color = darkText;
+      });
+
+      document.querySelectorAll('.username-link a').forEach(link => {
+        link.style.color = darkText;
+      });
+
+      document.querySelectorAll('#footer-box a').forEach(link => {
+        link.style.color = darkText;
+        link.onmouseover = () => {
+          link.style.color = accentColor;
+          link.style.transform = 'translateY(-3px)';
+        };
+        link.onmouseout = () => {
+          link.style.color = darkText;
+          link.style.transform = 'translateY(0)';
+        };
+      });
+
+      console.log('🌑 حالت تاریک فعال شد!');
+    }
+
+    function deactivateLightMode() {
+      const lightText = '#000000';
+
+      document.body.style.backgroundColor = '';
+      document.body.style.color = lightText;
+
+      if (header) {
+        header.style.backgroundColor = '';
+        header.style.color = lightText;
+      }
+
+      document.querySelectorAll('.user-box').forEach(box => {
+        box.style.backgroundColor = '';
+        box.style.borderColor = '';
+        box.style.color = lightText;
+      });
+
+      document.querySelectorAll('.username-link a').forEach(link => {
+        link.style.color = lightText;
+      });
+
+      document.querySelectorAll('#footer-box a').forEach(link => {
+        link.style.color = lightText;
+        link.style.transform = '';
+        link.onmouseover = null;
+        link.onmouseout = null;
+      });
+
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#FF8FAB');
+
+      if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.headerColor = "#FF8FAB";
+        Telegram.WebApp.backgroundColor = "#FF8FAB";
+        Telegram.WebApp.bottomBarColor = "#FF8FAB";
+      }
+
+      console.log('☀️ حالت روشن به‌درستی بازنشانی شد!');
+    }
+
+    // ✅ فعال‌سازی خودکار دارک مود در صورت تنظیم سیستم
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark && toggleInput && !toggleInput.checked) {
+      setTimeout(() => {
+        toggleInput.checked = true;
+        activateDarkMode();
+        console.log('🌙 دارک مود براساس تنظیمات سیستم فعال شد.');
+      }, 3000);
+    }
+  });
+</script>
 
 </body>
 </html>
