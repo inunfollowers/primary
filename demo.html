@@ -2669,17 +2669,28 @@ openDB();
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const transitionStyle = document.createElement('style');
-    transitionStyle.textContent = `
-      body,
-      .header,
-      .user-box,
-      .username-link a,
-      #footer-box a {
-        transition: background-color 2s, color 2s, border-color 2s;
-      }
-    `;
-    document.head.appendChild(transitionStyle);
+    // تابع اضافه کردن transition به صورت موقت
+    function applyThemeTransition() {
+      if (document.getElementById('theme-transition-style')) return;
+
+      const transitionStyle = document.createElement('style');
+      transitionStyle.id = 'theme-transition-style';
+      transitionStyle.textContent = `
+        body,
+        .header,
+        .user-box,
+        .username-link a,
+        #footer-box a {
+          transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+        }
+      `;
+      document.head.appendChild(transitionStyle);
+
+      setTimeout(() => {
+        const styleTag = document.getElementById('theme-transition-style');
+        if (styleTag) styleTag.remove();
+      }, 600);
+    }
 
     const toggleBtnHTML = `
       <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
@@ -2782,6 +2793,7 @@ openDB();
     const toggleInput = document.getElementById("themeToggle");
     if (toggleInput) {
       toggleInput.addEventListener("change", () => {
+        applyThemeTransition();
         if (toggleInput.checked) {
           activateDarkMode();
         } else {
@@ -2884,6 +2896,7 @@ openDB();
     if (prefersDark && toggleInput && !toggleInput.checked) {
       setTimeout(() => {
         toggleInput.checked = true;
+        applyThemeTransition();
         activateDarkMode();
         console.log('🌙 دارک مود براساس تنظیمات سیستم فعال شد.');
       }, 3000);
