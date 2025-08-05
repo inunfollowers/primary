@@ -2669,31 +2669,115 @@ openDB();
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // تابع اضافه کردن transition به صورت موقت
-    function applyThemeTransition() {
-      if (document.getElementById('theme-transition-style')) return;
+    const SELECTORS = {
+      userBox: '.user-box',
+      usernameLinks: '.username-link a',
+      footerLinks: '#footer-box a',
+      toggleInput: '#themeToggle',
+      header: '.header'
+    };
 
-      const transitionStyle = document.createElement('style');
-      transitionStyle.id = 'theme-transition-style';
-      transitionStyle.textContent = `
-        body,
-        .header,
-        .user-box,
-        .username-link a,
-        #footer-box a {
+    const COLORS = {
+      darkMain: '#121212',
+      darkHeader: '#1F1F1F',
+      darkBox: '#2C2C2C',
+      darkText: '#FFFFFF',
+      lightText: '#000000',
+      accent: '#FF4C6B',
+      lightThemeColor: '#FF8FAB'
+    };
+
+    const applyThemeTransition = () => {
+      if (document.getElementById('theme-transition-style')) return;
+      const style = document.createElement('style');
+      style.id = 'theme-transition-style';
+      style.textContent = `
+        body, .header, .user-box, .username-link a, #footer-box a {
           transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
         }
       `;
-      document.head.appendChild(transitionStyle);
+      document.head.appendChild(style);
+      setTimeout(() => style.remove(), 600);
+    };
 
-      setTimeout(() => {
-        const styleTag = document.getElementById('theme-transition-style');
-        if (styleTag) styleTag.remove();
-      }, 600);
-    }
+    const applyStyles = (elements, styles) => {
+      elements.forEach(el => Object.assign(el.style, styles));
+    };
 
+    const setTelegramColors = (color) => {
+      if (window.Telegram?.WebApp) {
+        Telegram.WebApp.headerColor = color;
+        Telegram.WebApp.backgroundColor = color;
+        Telegram.WebApp.bottomBarColor = color;
+      }
+    };
+
+    const activateDarkMode = () => {
+      document.body.style.backgroundColor = COLORS.darkMain;
+      document.body.style.color = COLORS.darkText;
+
+      document.querySelector(SELECTORS.header)?.style.setProperty('background-color', COLORS.darkHeader);
+      document.querySelector(SELECTORS.header)?.style.setProperty('color', COLORS.darkText);
+
+      applyStyles(document.querySelectorAll(SELECTORS.userBox), {
+        backgroundColor: COLORS.darkBox,
+        borderColor: COLORS.darkBox,
+        color: COLORS.darkText
+      });
+
+      applyStyles(document.querySelectorAll(SELECTORS.usernameLinks), {
+        color: COLORS.darkText
+      });
+
+      document.querySelectorAll(SELECTORS.footerLinks).forEach(link => {
+        link.style.color = COLORS.darkText;
+        link.onmouseover = () => {
+          link.style.color = COLORS.accent;
+          link.style.transform = 'translateY(-3px)';
+        };
+        link.onmouseout = () => {
+          link.style.color = COLORS.darkText;
+          link.style.transform = 'translateY(0)';
+        };
+      });
+
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLORS.darkMain);
+      setTelegramColors(COLORS.darkMain);
+      console.log('🌑 حالت تاریک فعال شد!');
+    };
+
+    const deactivateLightMode = () => {
+      document.body.style.backgroundColor = '';
+      document.body.style.color = COLORS.lightText;
+
+      document.querySelector(SELECTORS.header)?.style.setProperty('background-color', '');
+      document.querySelector(SELECTORS.header)?.style.setProperty('color', COLORS.lightText);
+
+      applyStyles(document.querySelectorAll(SELECTORS.userBox), {
+        backgroundColor: '',
+        borderColor: '',
+        color: COLORS.lightText
+      });
+
+      applyStyles(document.querySelectorAll(SELECTORS.usernameLinks), {
+        color: COLORS.lightText
+      });
+
+      document.querySelectorAll(SELECTORS.footerLinks).forEach(link => {
+        link.style.color = COLORS.lightText;
+        link.style.transform = '';
+        link.onmouseover = null;
+        link.onmouseout = null;
+      });
+
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLORS.lightThemeColor);
+      setTelegramColors(COLORS.lightThemeColor);
+      console.log('☀️ حالت روشن به‌درستی بازنشانی شد!');
+    };
+
+    // ایجاد دکمه
     const toggleBtnHTML = `
-      <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+      <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn">
         <input type="checkbox" id="themeToggle" class="themeToggleInput" />
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" stroke="none">
           <mask id="moon-mask">
@@ -2713,74 +2797,51 @@ openDB();
       </label>
     `;
 
-    const header = document.querySelector('.header');
+    const header = document.querySelector(SELECTORS.header);
     if (!header) return;
 
     const btnWrapper = document.createElement('div');
     btnWrapper.innerHTML = toggleBtnHTML;
-    btnWrapper.style.position = 'absolute';
-    btnWrapper.style.top = '10px';
-    btnWrapper.style.right = '10px';
-    btnWrapper.style.zIndex = '9999';
+    Object.assign(btnWrapper.style, {
+      position: 'absolute',
+      top: '10px',
+      right: '10px',
+      zIndex: '9999'
+    });
     header.style.position = 'relative';
     header.appendChild(btnWrapper);
 
     const style = document.createElement('style');
     style.textContent = `
-      .themeToggle {
-        color: white;
-        width: 1.5em;
-        height: 1.5em;
-      }
-      .st-sunMoonThemeToggleBtn {
-        position: relative;
-        cursor: pointer;
-        display: block;
-      }
-      .st-sunMoonThemeToggleBtn .themeToggleInput {
-        opacity: 0;
-        width: 100%;
-        aspect-ratio: 1;
-      }
+      .themeToggle { color: white; width: 1.5em; height: 1.5em; }
+      .st-sunMoonThemeToggleBtn { position: relative; cursor: pointer; display: block; }
+      .st-sunMoonThemeToggleBtn .themeToggleInput { opacity: 0; width: 100%; aspect-ratio: 1; }
       .st-sunMoonThemeToggleBtn svg {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
+        position: absolute; left: 0; top: 0;
+        width: 100%; height: 100%;
         transition: transform 0.4s ease;
         transform: rotate(40deg);
       }
       .st-sunMoonThemeToggleBtn svg .sunMoon {
-        transform-origin: center center;
-        transition: inherit;
-        transform: scale(1);
-        fill: white;
+        transform-origin: center; transition: inherit;
+        transform: scale(1); fill: white;
       }
       .st-sunMoonThemeToggleBtn svg .sunRay {
-        transform-origin: center center;
-        transform: scale(0);
-        fill: white;
+        transform-origin: center; transform: scale(0); fill: white;
       }
       .st-sunMoonThemeToggleBtn svg mask > circle {
         transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
         transform: translate(0px, 0px);
       }
-      .st-sunMoonThemeToggleBtn svg .sunRay2 { animation-delay: 0.05s !important; }
-      .st-sunMoonThemeToggleBtn svg .sunRay3 { animation-delay: 0.1s !important; }
-      .st-sunMoonThemeToggleBtn svg .sunRay4 { animation-delay: 0.17s !important; }
-      .st-sunMoonThemeToggleBtn svg .sunRay5 { animation-delay: 0.25s !important; }
-      .st-sunMoonThemeToggleBtn svg .sunRay6 { animation-delay: 0.29s !important; }
-      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg {
-        transform: rotate(90deg);
-      }
-      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg mask > circle {
-        transform: translate(16px, -3px);
-      }
-      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg .sunMoon {
-        transform: scale(0.55);
-      }
-      .st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg .sunRay {
+      .sunRay2 { animation-delay: 0.05s !important; }
+      .sunRay3 { animation-delay: 0.1s !important; }
+      .sunRay4 { animation-delay: 0.17s !important; }
+      .sunRay5 { animation-delay: 0.25s !important; }
+      .sunRay6 { animation-delay: 0.29s !important; }
+      .themeToggleInput:checked + svg { transform: rotate(90deg); }
+      .themeToggleInput:checked + svg mask > circle { transform: translate(16px, -3px); }
+      .themeToggleInput:checked + svg .sunMoon { transform: scale(0.55); }
+      .themeToggleInput:checked + svg .sunRay {
         animation: showRay1832 0.4s ease 0s 1 forwards;
       }
       @keyframes showRay1832 {
@@ -2790,110 +2851,16 @@ openDB();
     `;
     document.head.appendChild(style);
 
-    const toggleInput = document.getElementById("themeToggle");
+    const toggleInput = document.querySelector(SELECTORS.toggleInput);
     if (toggleInput) {
-      toggleInput.addEventListener("change", () => {
+      toggleInput.addEventListener('change', () => {
         applyThemeTransition();
-        if (toggleInput.checked) {
-          activateDarkMode();
-        } else {
-          deactivateLightMode();
-        }
+        toggleInput.checked ? activateDarkMode() : deactivateLightMode();
       });
     }
 
-    function activateDarkMode() {
-      const darkMain = '#121212';
-      const darkHeader = '#1F1F1F';
-      const darkBox = '#2C2C2C';
-      const darkText = '#FFFFFF';
-      const accentColor = '#FF4C6B';
-
-      document.body.style.backgroundColor = darkMain;
-      document.body.style.color = darkText;
-
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', darkMain);
-
-      if (window.Telegram && window.Telegram.WebApp) {
-        Telegram.WebApp.headerColor = darkMain;
-        Telegram.WebApp.backgroundColor = darkMain;
-        Telegram.WebApp.bottomBarColor = darkMain;
-      }
-
-      if (header) {
-        header.style.backgroundColor = darkHeader;
-        header.style.color = darkText;
-      }
-
-      document.querySelectorAll('.user-box').forEach(box => {
-        box.style.backgroundColor = darkBox;
-        box.style.borderColor = darkBox;
-        box.style.color = darkText;
-      });
-
-      document.querySelectorAll('.username-link a').forEach(link => {
-        link.style.color = darkText;
-      });
-
-      document.querySelectorAll('#footer-box a').forEach(link => {
-        link.style.color = darkText;
-        link.onmouseover = () => {
-          link.style.color = accentColor;
-          link.style.transform = 'translateY(-3px)';
-        };
-        link.onmouseout = () => {
-          link.style.color = darkText;
-          link.style.transform = 'translateY(0)';
-        };
-      });
-
-      console.log('🌑 حالت تاریک فعال شد!');
-    }
-
-    function deactivateLightMode() {
-      const lightText = '#000000';
-
-      document.body.style.backgroundColor = '';
-      document.body.style.color = lightText;
-
-      if (header) {
-        header.style.backgroundColor = '';
-        header.style.color = lightText;
-      }
-
-      document.querySelectorAll('.user-box').forEach(box => {
-        box.style.backgroundColor = '';
-        box.style.borderColor = '';
-        box.style.color = lightText;
-      });
-
-      document.querySelectorAll('.username-link a').forEach(link => {
-        link.style.color = lightText;
-      });
-
-      document.querySelectorAll('#footer-box a').forEach(link => {
-        link.style.color = lightText;
-        link.style.transform = '';
-        link.onmouseover = null;
-        link.onmouseout = null;
-      });
-
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#FF8FAB');
-
-      if (window.Telegram && window.Telegram.WebApp) {
-        Telegram.WebApp.headerColor = "#FF8FAB";
-        Telegram.WebApp.backgroundColor = "#FF8FAB";
-        Telegram.WebApp.bottomBarColor = "#FF8FAB";
-      }
-
-      console.log('☀️ حالت روشن به‌درستی بازنشانی شد!');
-    }
-
-    // ✅ فعال‌سازی خودکار دارک مود در صورت تنظیم سیستم
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark && toggleInput && !toggleInput.checked) {
+    // فعال‌سازی خودکار دارک‌مود در صورت تنظیم سیستم
+    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches && toggleInput && !toggleInput.checked) {
       setTimeout(() => {
         toggleInput.checked = true;
         applyThemeTransition();
