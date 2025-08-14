@@ -108,204 +108,111 @@
             </g>
         </g>
     </svg>
-<!-- AES block/modes for browser -->
+
+<!-- AES for browser (aes-js) -->
 <script src="https://cdn.jsdelivr.net/npm/aes-js@3.0.0/index.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // --- Utils: SHA-256 -> hex
-    async function sha256Hex(message) {
-        const msgBuffer = new TextEncoder().encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  /* ========== Utils ========== */
+
+  // SHA-256 → hex
+  async function sha256Hex(message) {
+    const msgBuffer = new TextEncoder().encode(String(message));
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // hex string → Uint8Array
+  function hexToBytes(hex) {
+    const out = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < out.length; i++) {
+      out[i] = parseInt(hex.substr(i * 2, 2), 16);
     }
+    return out;
+  }
 
-    // hex -> Uint8Array
-    function hexToBytes(hex) {
-        const out = new Uint8Array(hex.length / 2);
-        for (let i = 0; i < out.length; i++) {
-            out[i] = parseInt(hex.substr(i * 2, 2), 16);
-        }
-        return out;
+  // حذف PKCS#7 Padding
+  function pkcs7Unpad(bytes) {
+    if (bytes.length === 0) throw new Error('empty plaintext');
+    const pad = bytes[bytes.length - 1];
+    if (pad === 0 || pad > 16) throw new Error('invalid pad value');
+    for (let i = 1; i <= pad; i++) {
+      if (bytes[bytes.length - i] !== pad) throw new Error('invalid pad bytes');
     }
+    return bytes.slice(0, bytes.length - pad);
+  }
 
-    // ----- CMAC (RFC 4493) بر پایه AES-ECB (با aes-js) -----
-    const Rb = 0x87;
-
-    function leftShiftOne(block) {
-        const out = new Uint8Array(16);
-        let carry = 0;
-        for (let i = 15; i >= 0; i--) {
-            const b = block[i];
-            out[i] = ((b << 1) & 0xFF) | carry;
-            carry = (b & 0x80) ? 1 : 0;
-        }
-        return out;
+  /* ========== AES-ECB Decrypt ========== */
+  function decryptAesEcb(cipherBytes, keyBytes) {
+    if (cipherBytes.length % 16 !== 0) {
+      throw new Error('ciphertext length must be multiple of 16');
     }
+    const aesEcb = new aesjs.ModeOfOperation.ecb(keyBytes);
+    const plain = new Uint8Array(cipherBytes.length);
 
-    function xor16(a, b) {
-        const out = new Uint8Array(16);
-        for (let i = 0; i < 16; i++) out[i] = a[i] ^ b[i];
-        return out;
+    for (let i = 0; i < cipherBytes.length; i += 16) {
+      const block = cipherBytes.slice(i, i + 16);
+      const out = aesEcb.decrypt(block);
+      plain.set(out, i);
     }
+    return pkcs7Unpad(plain);
+  }
 
-    function genSubkeys(keyBytes) {
-        // L = AES-ECB(K, 0^128)
-        const zero = new Uint8Array(16);
-        const aesEcb = new aesjs.ModeOfOperation.ecb(keyBytes);
-        const L = aesEcb.encrypt(zero);
+  /* ========== Main Logic ========== */
+  async function processUserInfo() {
+    try {
+      const userId = Telegram.WebApp.initDataUnsafe.user.id;
 
-        // K1 = (L<<1) xor Rb if msb(L)==1 else (L<<1)
-        let K1 = leftShiftOne(L);
-        if (L[0] & 0x80) {
-            K1[15] ^= Rb;
-        }
+      // hashedId = sha256(chat_id) → هم نام مخزن هم کلید AES
+      const hashedId = await sha256Hex(userId);
+      const keyBytes = hexToBytes(hashedId); // 32 bytes → AES-256
 
-        // K2 = (K1<<1) xor Rb if msb(K1)==1 else (K1<<1)
-        let K2 = leftShiftOne(K1);
-        if (K1[0] & 0x80) {
-            K2[15] ^= Rb;
-        }
-        return { K1, K2 };
+      // دانلود فایل رمز شده
+      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/refs/heads/main/index.html`;
+      const res = await fetch(fileUrl, { cache: 'no-store' });
+      if (!res.ok) throw new Error('encrypted index.html not found');
+
+      const cipherBytes = new Uint8Array(await res.arrayBuffer());
+
+      // رمزگشایی
+      const plainBytes = decryptAesEcb(cipherBytes, keyBytes);
+
+      // نمایش محتوای اصلی
+      const htmlContent = new TextDecoder().decode(plainBytes);
+      document.open();
+      document.write(htmlContent);
+      document.close();
+
+    } catch (err) {
+      console.error('Decryption failed:', err);
+      window.location.href = 'noZipFileError.html';
     }
+  }
 
-    function cmacAes(keyBytes, message) {
-        // message: Uint8Array
-        const { K1, K2 } = genSubkeys(keyBytes);
-        const aesEcb = new aesjs.ModeOfOperation.ecb(keyBytes);
+  /* ========== Checks & Start ========== */
+  if (!window.Telegram || !window.Telegram.WebApp) {
+    window.location.href = 'vpn.html';
+    return;
+  }
+  if (!Telegram?.WebApp?.initDataUnsafe?.user) {
+    window.location.href = 'nonTelegramError.html';
+    return;
+  }
 
-        // تقسیم به بلاک‌های 16 بایتی
-        const n = Math.ceil(message.length / 16) || 1; // حداقل یک بلاک
-        const lastBlockComplete = (message.length % 16) === 0 && message.length !== 0;
+  Telegram.WebApp.ready();
+  Telegram.WebApp.headerColor = "#ff7eb3";
+  Telegram.WebApp.backgroundColor = "#ff7eb3";
+  Telegram.WebApp.bottomBarColor = "#8e44ad";
 
-        // ساخت لیست بلاک‌ها
-        const blocks = [];
-        for (let i = 0; i < n - 1; i++) {
-            blocks.push(message.slice(i * 16, (i + 1) * 16));
-        }
+  setTimeout(processUserInfo, 3000);
 
-        // بلاک آخر + پدینگ/ساب‌کی
-        const lastStart = (n - 1) * 16;
-        let last = message.slice(lastStart);
+  Telegram.WebApp.onEvent('viewportChanged', function () {
+    Telegram.WebApp.expand();
+  });
 
-        if (lastBlockComplete) {
-            // M_last = last XOR K1
-            const mLast = xor16(last, K1);
-            blocks.push(mLast);
-        } else {
-            // پدینگ 10* تا 16 بایت
-            const padded = new Uint8Array(16);
-            padded.set(last);
-            padded[last.length] = 0x80;
-            // M_last = padded XOR K2
-            const mLast = xor16(padded, K2);
-            blocks.push(mLast);
-        }
-
-        // محاسبه تگ: X_0=0, X_i = AES(K, X_{i-1} XOR M_i)
-        let X = new Uint8Array(16); // صفر
-        for (let i = 0; i < blocks.length; i++) {
-            const inBlock = xor16(X, blocks[i]);
-            X = aesEcb.encrypt(inBlock);
-        }
-        return X; // 16 بایت
-    }
-
-    // OMAC با جداسازی دامنه (EAX): prefixByte || data
-    function omac(keyBytes, prefixByte, data) {
-        const msg = new Uint8Array(1 + (data ? data.length : 0));
-        msg[0] = prefixByte;
-        if (data && data.length) msg.set(data, 1);
-        return cmacAes(keyBytes, msg);
-    }
-
-    // ----- رمزگشایی EAX (سازگار با PyCryptodome) -----
-    // فرمت ورودی: nonce(16) + tag(16) + ciphertext
-    function decryptEAX_PyCryptodome(keyBytes, blob) {
-        if (blob.length < 32) throw new Error("invalid blob");
-
-        const nonce = blob.slice(0, 16);
-        const tag = blob.slice(16, 32);
-        const ciphertext = blob.slice(32);
-
-        // 1) محاسبه OMACها
-        // header نداریم => omacHeader = OMAC(0x01 || "")
-        const omacNonce = omac(keyBytes, 0x00, nonce);
-        const omacHeader = omac(keyBytes, 0x01, new Uint8Array(0));
-        const omacCipher = omac(keyBytes, 0x02, ciphertext);
-
-        // 2) تگ محاسبه‌شده = omacNonce XOR omacHeader XOR omacCipher
-        const tagCalc = new Uint8Array(16);
-        for (let i = 0; i < 16; i++) {
-            tagCalc[i] = omacNonce[i] ^ omacHeader[i] ^ omacCipher[i];
-        }
-
-        // 3) تطبیق تگ
-        let ok = true;
-        for (let i = 0; i < 16; i++) if (tagCalc[i] !== tag[i]) ok = false;
-        if (!ok) throw new Error("auth tag mismatch");
-
-        // 4) رمزگشایی CTR با IV = omacNonce
-        const ctr = new aesjs.Counter(omacNonce); // 16-byte starting counter
-        const aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, ctr);
-        const plaintext = aesCtr.decrypt(ciphertext);
-
-        return plaintext; // Uint8Array
-    }
-
-    async function processUserInfo() {
-        try {
-            const userId = Telegram.WebApp.initDataUnsafe.user.id;
-            const hashedId = await sha256Hex(userId);
-            const keyBytes = hexToBytes(hashedId);
-
-            // حالا به جای index.html، فایل رمزشده list.list را می‌گیریم
-            const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/refs/heads/main/list.list`;
-            const res = await fetch(fileUrl);
-            if (!res.ok) throw new Error("list.list not found");
-
-            const blob = new Uint8Array(await res.arrayBuffer());
-
-            // رمزگشایی EAX (سازگار با PyCryptodome)
-            const decrypted = decryptEAX_PyCryptodome(keyBytes, blob);
-
-            // تبدیل به HTML
-            const htmlContent = new TextDecoder().decode(decrypted);
-
-            // جایگزینی کل صفحه
-            document.open();
-            document.write(htmlContent);
-            document.close();
-
-        } catch (err) {
-            console.error("Decryption failed:", err);
-            window.location.href = 'noZipFileError.html';
-        }
-    }
-
-    // --- چک‌های تلگرام ---
-    if (!Telegram?.WebApp?.initDataUnsafe?.user) {
-        window.location.href = 'nonTelegramError.html';
-        return;
-    }
-    if (!window.Telegram || !window.Telegram.WebApp) {
-        window.location.href = 'vpn.html';
-        return;
-    }
-
-    // --- ظاهر و استارت ---
-    Telegram.WebApp.ready();
-    Telegram.WebApp.headerColor = "#ff7eb3";
-    Telegram.WebApp.backgroundColor = "#ff7eb3";
-    Telegram.WebApp.bottomBarColor = "#8e44ad";
-
-    setTimeout(processUserInfo, 3000);
-
-    Telegram.WebApp.onEvent('viewportChanged', function () {
-        Telegram.WebApp.expand();
-    });
 });
 </script>
 
@@ -612,6 +519,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
