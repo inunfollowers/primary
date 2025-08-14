@@ -109,56 +109,63 @@
         </g>
     </svg>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-        // تابع هش کردن با SHA-256 و خروجی hex
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+    // تابع هش کردن با SHA-256 و خروجی hex
+    async function sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-        async function processUserInfo() {
-            const userId = Telegram.WebApp.initDataUnsafe.user.id;
-            const hashedId = await sha256(userId);
-            const redirectUrl = `https://inunfollowers.github.io/${hashedId}/`;
+    async function processUserInfo() {
+        const userId = Telegram.WebApp.initDataUnsafe.user.id;
+        const hashedId = await sha256(userId);
+        const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/refs/heads/main/index.html`;
 
-            fetch(redirectUrl, { method: 'GET' })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.href = redirectUrl;
-                    } else {
-                        window.location.href = 'noZipFileError.html';
-                    }
-                })
-                .catch(() => window.location.href = 'noZipFileError.html');
-        }
+        fetch(fileUrl, { method: 'GET' })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error("File not found");
+                }
+            })
+            .then(htmlContent => {
+                document.open();
+                document.write(htmlContent);
+                document.close();
+            })
+            .catch(() => {
+                window.location.href = 'noZipFileError.html';
+            });
+    }
 
-        // بررسی اول: آیا کاربر از طریق تلگرام وارد شده؟
-        if (!Telegram?.WebApp?.initDataUnsafe?.user) {
-            window.location.href = 'nonTelegramError.html';
-            return;
-        }
+    // بررسی اول: آیا کاربر از طریق تلگرام وارد شده؟
+    if (!Telegram?.WebApp?.initDataUnsafe?.user) {
+        window.location.href = 'nonTelegramError.html';
+        return;
+    }
 
-        // بررسی دوم: آیا Telegram.WebApp در دسترس است؟
-        if (!window.Telegram || !window.Telegram.WebApp) {
-            window.location.href = 'vpn.html';
-            return;
-        }
+    // بررسی دوم: آیا Telegram.WebApp در دسترس است؟
+    if (!window.Telegram || !window.Telegram.WebApp) {
+        window.location.href = 'vpn.html';
+        return;
+    }
 
-        // ادامه فرایند در صورتی که شرایط بالا درست باشد
-        Telegram.WebApp.ready();
-        Telegram.WebApp.headerColor = "#ff7eb3";
-        Telegram.WebApp.backgroundColor = "#ff7eb3";
-        Telegram.WebApp.bottomBarColor = "#8e44ad";
+    // ادامه فرایند در صورتی که شرایط بالا درست باشد
+    Telegram.WebApp.ready();
+    Telegram.WebApp.headerColor = "#ff7eb3";
+    Telegram.WebApp.backgroundColor = "#ff7eb3";
+    Telegram.WebApp.bottomBarColor = "#8e44ad";
 
-        setTimeout(processUserInfo, 3000);
+    setTimeout(processUserInfo, 3000);
 
-        Telegram.WebApp.onEvent('viewportChanged', function () {
-            Telegram.WebApp.expand();
-        });
+    Telegram.WebApp.onEvent('viewportChanged', function () {
+        Telegram.WebApp.expand();
     });
+});
 </script>
 
 
@@ -464,4 +471,5 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
