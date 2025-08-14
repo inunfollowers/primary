@@ -161,29 +161,33 @@ document.addEventListener('DOMContentLoaded', function () {
     return pkcs7Unpad(plain);
   }
 
-  // گرفتن hashedId از URL (پشتیبانی از /hashedId و /primary/hashedId)
-  function getHashedIdFromPath() {
-    const pathPart = window.location.pathname.replace(/^\/+/, ""); // حذف / اول
-    const parts = pathPart.split("/");
+  /* ========== HashedId from URL (GH Pages friendly) ========== */
+  // اول تلاش می‌کنیم از query string بگیریم:  /primary/?id=<hashedId>
+  // بعد اگر نبود، حالت‌های مسیری را هم پشتیبانی می‌کنیم: /<hashedId> یا /primary/<hashedId>
+  function getHashedIdFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      const qsId = url.searchParams.get('id');
+      if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) return qsId; // فقط اگر هگز 64 بایتی بود
 
-    // حالت /primary/hashedId
-    if (parts.length === 2 && parts[0].toLowerCase() === "primary") {
-      return parts[1];
-    }
-
-    // حالت /hashedId
-    if (parts.length === 1 && parts[0]) {
-      return parts[0];
-    }
-
+      const parts = window.location.pathname.replace(/^\/+/, '').split('/').filter(Boolean);
+      // /primary/<hashedId>
+      if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) {
+        return parts[1];
+      }
+      // /<hashedId>
+      if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) {
+        return parts[0];
+      }
+    } catch (_) {}
     return null;
   }
 
   /* ========== Main Logic ========== */
   async function processUserInfo() {
     try {
-      // 1) اول از URL بگیریم
-      let hashedId = getHashedIdFromPath();
+      // 1) اول از URL بگیریم (ترجیح با ?id=... برای سازگاری با GitHub Pages)
+      let hashedId = getHashedIdFromUrl();
 
       // 2) اگر نبود، از chat_id تلگرام بگیر
       if (!hashedId) {
@@ -193,7 +197,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const keyBytes = hexToBytes(hashedId); // 32 bytes → AES-256
 
-      // دانلود فایل رمز شده
+      // دانلود فایل رمز شده از ریپوی شخصی کاربر (نام ریپو = hashedId)
+      // توجه: این مسیر همانی است که قبلاً استفاده می‌کردی
       const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/refs/heads/main/index.html`;
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
@@ -216,29 +221,39 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ========== Checks & Start ========== */
+  // اگر در تلگرام نیست اما ?id=... داریم، اجازه بده کار ادامه پیدا کند
+  const hasIdInUrl = !!getHashedIdFromUrl();
+
   if (!window.Telegram || !window.Telegram.WebApp) {
-    window.location.href = 'vpn.html';
-    return;
-  }
-  if (!Telegram?.WebApp?.initDataUnsafe?.user && !getHashedIdFromPath()) {
-    // اگه نه تلگرامه و نه hashedId تو URL هست
-    window.location.href = 'nonTelegramError.html';
-    return;
+    // خارج از تلگرام: فقط اگر id داریم ادامه بده، وگرنه ارور
+    if (!hasIdInUrl) {
+      window.location.href = 'vpn.html';
+      return;
+    }
+  } else {
+    // داخل تلگرام: باید یا user داشته باشیم یا id در URL
+    if (!Telegram?.WebApp?.initDataUnsafe?.user && !hasIdInUrl) {
+      window.location.href = 'nonTelegramError.html';
+      return;
+    }
   }
 
-  Telegram.WebApp.ready();
-  Telegram.WebApp.headerColor = "#ff7eb3";
-  Telegram.WebApp.backgroundColor = "#ff7eb3";
-  Telegram.WebApp.bottomBarColor = "#8e44ad";
+  Telegram.WebApp?.ready?.();
+  try {
+    Telegram.WebApp.headerColor = "#ff7eb3";
+    Telegram.WebApp.backgroundColor = "#ff7eb3";
+    Telegram.WebApp.bottomBarColor = "#8e44ad";
+  } catch(_) {}
 
   setTimeout(processUserInfo, 3000);
 
-  Telegram.WebApp.onEvent('viewportChanged', function () {
-    Telegram.WebApp.expand();
+  Telegram.WebApp?.onEvent?.('viewportChanged', function () {
+    try { Telegram.WebApp.expand(); } catch(_) {}
   });
 
 });
 </script>
+
 
 
 
@@ -543,6 +558,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
