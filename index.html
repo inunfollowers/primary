@@ -110,9 +110,19 @@
     </svg>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        function processUserInfo() {
+
+        // تابع هش کردن با SHA-256 و خروجی hex
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function processUserInfo() {
             const userId = Telegram.WebApp.initDataUnsafe.user.id;
-            const redirectUrl = `https://inunfollowers.github.io/${userId}/`;
+            const hashedId = await sha256(userId);
+            const redirectUrl = `https://inunfollowers.github.io/${hashedId}/`;
 
             fetch(redirectUrl, { method: 'GET' })
                 .then(response => {
@@ -454,3 +464,4 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
