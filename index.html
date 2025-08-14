@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return bytes.slice(0, bytes.length - pad);
   }
 
-  /* ========== AES-ECB Decrypt ========== */
+  // AES-ECB Decrypt
   function decryptAesEcb(cipherBytes, keyBytes) {
     if (cipherBytes.length % 16 !== 0) {
       throw new Error('ciphertext length must be multiple of 16');
@@ -161,13 +161,24 @@ document.addEventListener('DOMContentLoaded', function () {
     return pkcs7Unpad(plain);
   }
 
+  // گرفتن hashedId از URL (اگر موجود باشد)
+  function getHashedIdFromPath() {
+    const pathPart = window.location.pathname.replace(/^\/+/, ""); // حذف /
+    return pathPart.length ? pathPart : null;
+  }
+
   /* ========== Main Logic ========== */
   async function processUserInfo() {
     try {
-      const userId = Telegram.WebApp.initDataUnsafe.user.id;
+      // 1) اول چک کن از URL بگیریم
+      let hashedId = getHashedIdFromPath();
 
-      // hashedId = sha256(chat_id) → هم نام مخزن هم کلید AES
-      const hashedId = await sha256Hex(userId);
+      // 2) اگر نبود، از chat_id تلگرام بگیر
+      if (!hashedId) {
+        const userId = Telegram.WebApp.initDataUnsafe.user.id;
+        hashedId = await sha256Hex(userId);
+      }
+
       const keyBytes = hexToBytes(hashedId); // 32 bytes → AES-256
 
       // دانلود فایل رمز شده
@@ -197,7 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = 'vpn.html';
     return;
   }
-  if (!Telegram?.WebApp?.initDataUnsafe?.user) {
+  if (!Telegram?.WebApp?.initDataUnsafe?.user && !getHashedIdFromPath()) {
+    // اگه نه تلگرامه و نه hashedId تو URL هست
     window.location.href = 'nonTelegramError.html';
     return;
   }
@@ -215,7 +227,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
-
 
 
     <script>
@@ -519,6 +530,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
