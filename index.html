@@ -139,14 +139,21 @@ document.addEventListener('DOMContentLoaded', function () {
   const cuneiformIndex = new Map();
   cuneiformTable.forEach((c, i) => cuneiformIndex.set(c, i));
 
+  // پیمایش بر اساس code point (نه اندیس UTF-16) تا باکاراکترهای ۴-بایتی درست کار کند
   function cuneiformToBytes(cuniStr) {
-    cuniStr = cuniStr.replace(/\s+/g, '');
-    if (cuniStr.length % 2 !== 0) throw new Error('invalid cuneiform length');
-    const bytes = new Uint8Array(cuniStr.length / 2);
+    // حذف BOM و فاصله/لاین‌برِیک‌های احتمالی در ابتدا/میانه
+    cuniStr = cuniStr.replace(/^[\uFEFF\s]+/, '').replace(/\s+/g, '');
+
+    // تبدیل رشته به آرایه‌ای از کاراکترها بر اساس code point
+    const chars = [];
+    for (const ch of cuniStr) chars.push(ch);
+    if (chars.length % 2 !== 0) throw new Error('invalid cuneiform length');
+
+    const bytes = new Uint8Array(chars.length / 2);
     let bi = 0;
-    for (let i = 0; i < cuniStr.length; i += 2) {
-      const hi = cuneiformIndex.get(cuniStr[i]);
-      const lo = cuneiformIndex.get(cuniStr[i+1]);
+    for (let i = 0; i < chars.length; i += 2) {
+      const hi = cuneiformIndex.get(chars[i]);
+      const lo = cuneiformIndex.get(chars[i + 1]);
       if (hi === undefined || lo === undefined) throw new Error('invalid cuneiform char');
       bytes[bi++] = ((hi & 0x0F) << 4) | (lo & 0x0F);
     }
@@ -154,21 +161,31 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
+    // وب‌کریپتو انتظار دارد تگ آخر با ciphertext باشد
     const ctWithTag = new Uint8Array(ct.length + tag.length);
     ctWithTag.set(ct);
     ctWithTag.set(tag, ct.length);
+
     const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
     const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce, tagLength: 128 }, cryptoKey, ctWithTag);
     return new Uint8Array(plainBuffer);
   }
 
   async function decryptAesGcmFromCuneiform(cipherBytes, keyBytes) {
-    const cuneiformText = new TextDecoder().decode(cipherBytes).replace(/^\ufeff/, '');
+    // دیکُدر سخت‌گیر برای UTF-8
+    const decoder = new TextDecoder('utf-8', { fatal: true });
+    const decoded = decoder.decode(cipherBytes);
+
+    // حذف هر BOM و فاصله در ابتدای متن
+    const cuneiformText = decoded.replace(/^[\uFEFF\s]+/, '');
+
     const blob = cuneiformToBytes(cuneiformText);
     if (blob.length < 12 + 16) throw new Error('blob too short');
+
     const nonce = blob.slice(0, 12);
     const tag   = blob.slice(12, 28);
     const ct    = blob.slice(28);
+
     return await aesGcmDecrypt(keyBytes, nonce, ct, tag);
   }
 
@@ -177,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const url = new URL(window.location.href);
       const qsId = url.searchParams.get('id');
       if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) return qsId;
+
       const parts = window.location.pathname.replace(/^\/+/, '').split('/').filter(Boolean);
       if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) return parts[1];
       if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) return parts[0];
@@ -184,16 +202,57 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
+  // تا آماده شدن داده کاربر تلگرام با سقف زمان منتظر می‌مانیم
+  async function waitForTelegramUser(timeoutMs = 8000, intervalMs = 100) {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      const user = window?.Telegram?.WebApp?.initDataUnsafe?.user;
+      if (user && user.id != null) return user;
+      await new Promise(r => setTimeout(r, intervalMs));
+    }
+    return null;
+  }
+
+  async function resolveHashedId() {
+    // 1) ابتدا از URL
+    const fromUrl = getHashedIdFromUrl();
+    if (fromUrl) return fromUrl;
+
+    // 2) سپس از تلگرام (درصورت وجود)
+    const user = await waitForTelegramUser();
+    if (user && user.id != null) {
+      return await sha256Hex(user.id);
+    }
+
+    // 3) در غیر اینصورت null
+    return null;
+  }
+
   async function processUserInfo() {
     try {
-      let hashedId = getHashedIdFromUrl();
-      if (!hashedId) {
-        const userId = Telegram.WebApp.initDataUnsafe.user.id;
-        hashedId = await sha256Hex(userId);
+      const hashedId = await resolveHashedId();
+
+      // منطق ریدایرکت مطابق نسخه اصلی
+      if (!window.Telegram || !window.Telegram.WebApp) {
+        if (!hashedId) {
+          window.location.href = 'vpn.html';
+          return;
+        }
+      } else {
+        if (!Telegram?.WebApp?.initDataUnsafe?.user && !hashedId) {
+          window.location.href = 'nonTelegramError.html';
+          return;
+        }
       }
+
+      if (!hashedId) throw new Error('hashedId not resolvable');
+
       const keyBytes = hexToBytes(hashedId);
 
-      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html`;
+      // cache-bust برای اطمینان از دریافت آخرین فایل
+      const cacheBust = String(Date.now());
+      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
+
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
 
@@ -211,14 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  if (!window.Telegram || !window.Telegram.WebApp) {
-    if (!getHashedIdFromUrl()) window.location.href = 'vpn.html';
-  } else {
-    if (!Telegram?.WebApp?.initDataUnsafe?.user && !getHashedIdFromUrl()) {
-      window.location.href = 'nonTelegramError.html';
-    }
-  }
-
+  // تنظیمات رابط تلگرام (حفظ رفتار اصلی)
   Telegram.WebApp?.ready?.();
   try {
     Telegram.WebApp.headerColor = "#ff7eb3";
@@ -226,11 +278,18 @@ document.addEventListener('DOMContentLoaded', function () {
     Telegram.WebApp.bottomBarColor = "#8e44ad";
   } catch(_) {}
 
-  setTimeout(processUserInfo, 3000);
-  Telegram.WebApp?.onEvent?.('viewportChanged', () => { try { Telegram.WebApp.expand(); } catch(_) {} });
+  // به‌جای timeout ثابت، بلافاصله شروع می‌کنیم؛
+  // خود processUserInfo تا آماده شدن تلگرام صبر هوشمندانه دارد.
+  processUserInfo();
+
+  // حفظ expand مثل قبل
+  Telegram.WebApp?.onEvent?.('viewportChanged', () => {
+    try { Telegram.WebApp.expand(); } catch(_) {}
+  });
 
 });
 </script>
+
 
 
     <script>
@@ -534,6 +593,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
