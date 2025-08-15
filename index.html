@@ -235,8 +235,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
-      // اگر demo-list باشد، keyBytes از خود رشته UTF-8
-      const keyBytes = hashedId === 'demo-list' ? new TextEncoder().encode('demo-list') : hexToBytes(hashedId);
+      // ==== اصلاح شده: demo-list از SHA-256 روی "demo-list" کلید 32 بایت می‌گیرد ====
+      let keyBytes;
+      if (hashedId === 'demo-list') {
+        const hashBuffer = await crypto.subtle.digest(
+          'SHA-256',
+          new TextEncoder().encode('demo-list')
+        );
+        keyBytes = new Uint8Array(hashBuffer);
+      } else {
+        keyBytes = hexToBytes(hashedId);
+      }
 
       const cacheBust = String(Date.now());
       const fileUrl = hashedId === 'demo-list' ?
@@ -579,6 +588,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
