@@ -134,7 +134,67 @@ document.addEventListener('DOMContentLoaded', function () {
     return out;
   }
 
-  // حذف PKCS#7 Padding
+  // جدول خط میخی (0..15)
+  const cuneiformTable = [
+    "𒀀","𒀁","𒀂","𒀃","𒀄","𒀅","𒀆","𒀇",
+    "𒀈","𒀉","𒀊","𒀋","𒀌","𒀍","𒀎","𒀏"
+  ];
+  const cuneiformIndex = (() => {
+    const m = new Map();
+    for (let i = 0; i < cuneiformTable.length; i++) m.set(cuneiformTable[i], i);
+    return m;
+  })();
+
+  // تبدیل رشته‌ی خط‌میخی به بایت‌ها (هر دو کاراکتر → یک بایت)
+  function cuneiformToBytes(cuniStr) {
+    // حذف فاصله/خط‌جدید احتمالی
+    cuniStr = cuniStr.replace(/\s+/g, '');
+    if (cuniStr.length % 2 !== 0) {
+      throw new Error('invalid cuneiform length');
+    }
+    const bytes = new Uint8Array(cuniStr.length / 2);
+    let bi = 0;
+    for (let i = 0; i < cuniStr.length; i += 2) {
+      const hiChar = cuniStr[i];
+      const loChar = cuniStr[i + 1];
+      const hi = cuneiformIndex.get(hiChar);
+      const lo = cuneiformIndex.get(loChar);
+      if (hi === undefined || lo === undefined) {
+        throw new Error('invalid cuneiform character encountered');
+      }
+      bytes[bi++] = ((hi & 0x0f) << 4) | (lo & 0x0f);
+    }
+    return bytes;
+  }
+
+  // AES-GCM decrypt via WebCrypto
+  async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
+    // WebCrypto انتظار دارد tag به انتهای ciphertext چسبانده شود
+    const ctWithTag = new Uint8Array(ct.length + tag.length);
+    ctWithTag.set(ct, 0);
+    ctWithTag.set(tag, ct.length);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'AES-GCM' },
+      false,
+      ['decrypt']
+    );
+
+    const plainBuffer = await crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv: nonce,
+        tagLength: 128
+      },
+      cryptoKey,
+      ctWithTag
+    );
+    return new Uint8Array(plainBuffer);
+  }
+
+  // حذف PKCS#7 Padding (دیگر استفاده نمی‌شود، نگه داشته شده برای سازگاری)
   function pkcs7Unpad(bytes) {
     if (bytes.length === 0) throw new Error('empty plaintext');
     const pad = bytes[bytes.length - 1];
@@ -145,20 +205,23 @@ document.addEventListener('DOMContentLoaded', function () {
     return bytes.slice(0, bytes.length - pad);
   }
 
-  // AES-ECB Decrypt
-  function decryptAesEcb(cipherBytes, keyBytes) {
-    if (cipherBytes.length % 16 !== 0) {
-      throw new Error('ciphertext length must be multiple of 16');
-    }
-    const aesEcb = new aesjs.ModeOfOperation.ecb(keyBytes);
-    const plain = new Uint8Array(cipherBytes.length);
+  // تابع با نام قبلی، ولی الان: خط‌میخی + AES-GCM (async)
+  async function decryptAesEcb(cipherBytes, keyBytes) {
+    // cipherBytes در واقع بایت‌های UTF-8 یک رشته‌ی خط‌میخی است
+    const cuneiformText = new TextDecoder().decode(cipherBytes);
 
-    for (let i = 0; i < cipherBytes.length; i += 16) {
-      const block = cipherBytes.slice(i, i + 16);
-      const out = aesEcb.decrypt(block);
-      plain.set(out, i);
-    }
-    return pkcs7Unpad(plain);
+    // ۱) خط‌میخی → بایت‌ها
+    const blob = cuneiformToBytes(cuneiformText);
+
+    // ۲) جدا سازی nonce(12) + tag(16) + ciphertext
+    if (blob.length < 12 + 16) throw new Error('blob too short');
+    const nonce = blob.slice(0, 12);
+    const tag   = blob.slice(12, 28);
+    const ct    = blob.slice(28);
+
+    // ۳) AES-GCM decrypt
+    const plain = await aesGcmDecrypt(keyBytes, nonce, ct, tag);
+    return plain;
   }
 
   /* ========== HashedId from URL (GH Pages friendly) ========== */
@@ -203,10 +266,12 @@ document.addEventListener('DOMContentLoaded', function () {
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
 
+      // فایل روی گیت‌هاب «متن خط‌میخی» است؛
+      // برای حداقل تغییر در منطق، همان arrayBuffer می‌گیریم و داخل decrypt تبدیل به رشته می‌کنیم
       const cipherBytes = new Uint8Array(await res.arrayBuffer());
 
-      // رمزگشایی
-      const plainBytes = decryptAesEcb(cipherBytes, keyBytes);
+      // رمزگشایی (الان async است)
+      const plainBytes = await decryptAesEcb(cipherBytes, keyBytes);
 
       // نمایش محتوای اصلی
       const htmlContent = new TextDecoder().decode(plainBytes);
@@ -253,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+
 
 
 
@@ -558,6 +624,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
