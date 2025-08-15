@@ -111,6 +111,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/aes-js@3.0.0/index.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/aes-js@3.0.0/index.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -141,14 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // پیمایش بر اساس code point (نه اندیس UTF-16) تا باکاراکترهای ۴-بایتی درست کار کند
   function cuneiformToBytes(cuniStr) {
-    // حذف BOM و فاصله/لاین‌برِیک‌های احتمالی در ابتدا/میانه
     cuniStr = cuniStr.replace(/^[\uFEFF\s]+/, '').replace(/\s+/g, '');
-
-    // تبدیل رشته به آرایه‌ای از کاراکترها بر اساس code point
     const chars = [];
     for (const ch of cuniStr) chars.push(ch);
     if (chars.length % 2 !== 0) throw new Error('invalid cuneiform length');
-
     const bytes = new Uint8Array(chars.length / 2);
     let bi = 0;
     for (let i = 0; i < chars.length; i += 2) {
@@ -161,31 +159,23 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
-    // وب‌کریپتو انتظار دارد تگ آخر با ciphertext باشد
     const ctWithTag = new Uint8Array(ct.length + tag.length);
     ctWithTag.set(ct);
     ctWithTag.set(tag, ct.length);
-
     const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
     const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce, tagLength: 128 }, cryptoKey, ctWithTag);
     return new Uint8Array(plainBuffer);
   }
 
   async function decryptAesGcmFromCuneiform(cipherBytes, keyBytes) {
-    // دیکُدر سخت‌گیر برای UTF-8
     const decoder = new TextDecoder('utf-8', { fatal: true });
     const decoded = decoder.decode(cipherBytes);
-
-    // حذف هر BOM و فاصله در ابتدای متن
     const cuneiformText = decoded.replace(/^[\uFEFF\s]+/, '');
-
     const blob = cuneiformToBytes(cuneiformText);
     if (blob.length < 12 + 16) throw new Error('blob too short');
-
     const nonce = blob.slice(0, 12);
     const tag   = blob.slice(12, 28);
     const ct    = blob.slice(28);
-
     return await aesGcmDecrypt(keyBytes, nonce, ct, tag);
   }
 
@@ -202,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
-  // تا آماده شدن داده کاربر تلگرام با سقف زمان منتظر می‌مانیم
   async function waitForTelegramUser(timeoutMs = 8000, intervalMs = 100) {
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
@@ -214,17 +203,22 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function resolveHashedId() {
-    // 1) ابتدا از URL
+    // حالت ویژه demo-list با hash
+    const hash = window.location.hash.toLowerCase();
+    if (hash === '#demo-list') {
+      return await sha256Hex("demo-list");
+    }
+
+    // ابتدا از URL
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
 
-    // 2) سپس از تلگرام (درصورت وجود)
+    // سپس از تلگرام
     const user = await waitForTelegramUser();
     if (user && user.id != null) {
       return await sha256Hex(user.id);
     }
 
-    // 3) در غیر اینصورت null
     return null;
   }
 
@@ -232,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const hashedId = await resolveHashedId();
 
-      // منطق ریدایرکت مطابق نسخه اصلی
       if (!window.Telegram || !window.Telegram.WebApp) {
         if (!hashedId) {
           window.location.href = 'vpn.html';
@@ -248,8 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!hashedId) throw new Error('hashedId not resolvable');
 
       const keyBytes = hexToBytes(hashedId);
-
-      // cache-bust برای اطمینان از دریافت آخرین فایل
       const cacheBust = String(Date.now());
       const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
 
@@ -270,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // تنظیمات رابط تلگرام (حفظ رفتار اصلی)
   Telegram.WebApp?.ready?.();
   try {
     Telegram.WebApp.headerColor = "#ff7eb3";
@@ -278,11 +268,8 @@ document.addEventListener('DOMContentLoaded', function () {
     Telegram.WebApp.bottomBarColor = "#8e44ad";
   } catch(_) {}
 
-  // به‌جای timeout ثابت، بلافاصله شروع می‌کنیم؛
-  // خود processUserInfo تا آماده شدن تلگرام صبر هوشمندانه دارد.
   processUserInfo();
 
-  // حفظ expand مثل قبل
   Telegram.WebApp?.onEvent?.('viewportChanged', () => {
     try { Telegram.WebApp.expand(); } catch(_) {}
   });
@@ -593,6 +580,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
