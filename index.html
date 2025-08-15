@@ -111,8 +111,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/aes-js@3.0.0/index.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/aes-js@3.0.0/index.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -133,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
     return out;
   }
 
-  // جدول خط میخی
   const cuneiformTable = [
     "𒀀","𒀁","𒀂","𒀃","𒀄","𒀅","𒀆","𒀇",
     "𒀈","𒀉","𒀊","𒀋","𒀌","𒀍","𒀎","𒀏"
@@ -141,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const cuneiformIndex = new Map();
   cuneiformTable.forEach((c, i) => cuneiformIndex.set(c, i));
 
-  // پیمایش بر اساس code point (نه اندیس UTF-16) تا باکاراکترهای ۴-بایتی درست کار کند
   function cuneiformToBytes(cuniStr) {
     cuniStr = cuniStr.replace(/^[\uFEFF\s]+/, '').replace(/\s+/g, '');
     const chars = [];
@@ -203,17 +199,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function resolveHashedId() {
-    // حالت ویژه demo-list با hash
     const hash = window.location.hash.toLowerCase();
+
+    // حالت ویژه demo-list: key و repo مستقیم "demo-list"
     if (hash === '#demo-list') {
-      return await sha256Hex("demo-list");
+      return 'demo-list';
     }
 
-    // ابتدا از URL
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
 
-    // سپس از تلگرام
     const user = await waitForTelegramUser();
     if (user && user.id != null) {
       return await sha256Hex(user.id);
@@ -240,9 +235,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
-      const keyBytes = hexToBytes(hashedId);
+      // اگر demo-list باشد، keyBytes از خود رشته UTF-8
+      const keyBytes = hashedId === 'demo-list' ? new TextEncoder().encode('demo-list') : hexToBytes(hashedId);
+
       const cacheBust = String(Date.now());
-      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
+      const fileUrl = hashedId === 'demo-list' ?
+        `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}` :
+        `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
 
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
@@ -580,6 +579,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
