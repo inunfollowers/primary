@@ -109,7 +109,6 @@
         </g>
     </svg>
 
-<!-- AES for browser (aes-js) -->
 <script src="https://cdn.jsdelivr.net/npm/aes-js@3.0.0/index.min.js"></script>
 
 <script>
@@ -117,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ========== Utils ========== */
 
-  // SHA-256 → hex
   async function sha256Hex(message) {
     const msgBuffer = new TextEncoder().encode(String(message));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -125,7 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // hex string → Uint8Array
   function hexToBytes(hex) {
     const out = new Uint8Array(hex.length / 2);
     for (let i = 0; i < out.length; i++) {
@@ -134,147 +131,76 @@ document.addEventListener('DOMContentLoaded', function () {
     return out;
   }
 
-  // جدول خط میخی (0..15)
+  // جدول خط میخی
   const cuneiformTable = [
     "𒀀","𒀁","𒀂","𒀃","𒀄","𒀅","𒀆","𒀇",
     "𒀈","𒀉","𒀊","𒀋","𒀌","𒀍","𒀎","𒀏"
   ];
-  const cuneiformIndex = (() => {
-    const m = new Map();
-    for (let i = 0; i < cuneiformTable.length; i++) m.set(cuneiformTable[i], i);
-    return m;
-  })();
+  const cuneiformIndex = new Map();
+  cuneiformTable.forEach((c, i) => cuneiformIndex.set(c, i));
 
-  // تبدیل رشته‌ی خط‌میخی به بایت‌ها (هر دو کاراکتر → یک بایت)
   function cuneiformToBytes(cuniStr) {
-    // حذف فاصله/خط‌جدید احتمالی
     cuniStr = cuniStr.replace(/\s+/g, '');
-    if (cuniStr.length % 2 !== 0) {
-      throw new Error('invalid cuneiform length');
-    }
+    if (cuniStr.length % 2 !== 0) throw new Error('invalid cuneiform length');
     const bytes = new Uint8Array(cuniStr.length / 2);
     let bi = 0;
     for (let i = 0; i < cuniStr.length; i += 2) {
-      const hiChar = cuniStr[i];
-      const loChar = cuniStr[i + 1];
-      const hi = cuneiformIndex.get(hiChar);
-      const lo = cuneiformIndex.get(loChar);
-      if (hi === undefined || lo === undefined) {
-        throw new Error('invalid cuneiform character encountered');
-      }
-      bytes[bi++] = ((hi & 0x0f) << 4) | (lo & 0x0f);
+      const hi = cuneiformIndex.get(cuniStr[i]);
+      const lo = cuneiformIndex.get(cuniStr[i+1]);
+      if (hi === undefined || lo === undefined) throw new Error('invalid cuneiform char');
+      bytes[bi++] = ((hi & 0x0F) << 4) | (lo & 0x0F);
     }
     return bytes;
   }
 
-  // AES-GCM decrypt via WebCrypto
   async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
-    // WebCrypto انتظار دارد tag به انتهای ciphertext چسبانده شود
     const ctWithTag = new Uint8Array(ct.length + tag.length);
-    ctWithTag.set(ct, 0);
+    ctWithTag.set(ct);
     ctWithTag.set(tag, ct.length);
-
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      keyBytes,
-      { name: 'AES-GCM' },
-      false,
-      ['decrypt']
-    );
-
-    const plainBuffer = await crypto.subtle.decrypt(
-      {
-        name: 'AES-GCM',
-        iv: nonce,
-        tagLength: 128
-      },
-      cryptoKey,
-      ctWithTag
-    );
+    const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
+    const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce, tagLength: 128 }, cryptoKey, ctWithTag);
     return new Uint8Array(plainBuffer);
   }
 
-  // حذف PKCS#7 Padding (دیگر استفاده نمی‌شود، نگه داشته شده برای سازگاری)
-  function pkcs7Unpad(bytes) {
-    if (bytes.length === 0) throw new Error('empty plaintext');
-    const pad = bytes[bytes.length - 1];
-    if (pad === 0 || pad > 16) throw new Error('invalid pad value');
-    for (let i = 1; i <= pad; i++) {
-      if (bytes[bytes.length - i] !== pad) throw new Error('invalid pad bytes');
-    }
-    return bytes.slice(0, bytes.length - pad);
-  }
-
-  // تابع با نام قبلی، ولی الان: خط‌میخی + AES-GCM (async)
-  async function decryptAesEcb(cipherBytes, keyBytes) {
-    // cipherBytes در واقع بایت‌های UTF-8 یک رشته‌ی خط‌میخی است
-    const cuneiformText = new TextDecoder().decode(cipherBytes);
-
-    // ۱) خط‌میخی → بایت‌ها
+  async function decryptAesGcmFromCuneiform(cipherBytes, keyBytes) {
+    const cuneiformText = new TextDecoder().decode(cipherBytes).replace(/^\ufeff/, '');
     const blob = cuneiformToBytes(cuneiformText);
-
-    // ۲) جدا سازی nonce(12) + tag(16) + ciphertext
     if (blob.length < 12 + 16) throw new Error('blob too short');
     const nonce = blob.slice(0, 12);
     const tag   = blob.slice(12, 28);
     const ct    = blob.slice(28);
-
-    // ۳) AES-GCM decrypt
-    const plain = await aesGcmDecrypt(keyBytes, nonce, ct, tag);
-    return plain;
+    return await aesGcmDecrypt(keyBytes, nonce, ct, tag);
   }
 
-  /* ========== HashedId from URL (GH Pages friendly) ========== */
-  // اول تلاش می‌کنیم از query string بگیریم:  /primary/?id=<hashedId>
-  // بعد اگر نبود، حالت‌های مسیری را هم پشتیبانی می‌کنیم: /<hashedId> یا /primary/<hashedId>
   function getHashedIdFromUrl() {
     try {
       const url = new URL(window.location.href);
       const qsId = url.searchParams.get('id');
-      if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) return qsId; // فقط اگر هگز 64 بایتی بود
-
+      if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) return qsId;
       const parts = window.location.pathname.replace(/^\/+/, '').split('/').filter(Boolean);
-      // /primary/<hashedId>
-      if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) {
-        return parts[1];
-      }
-      // /<hashedId>
-      if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) {
-        return parts[0];
-      }
-    } catch (_) {}
+      if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) return parts[1];
+      if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) return parts[0];
+    } catch(_) {}
     return null;
   }
 
-  /* ========== Main Logic ========== */
   async function processUserInfo() {
     try {
-      // 1) اول از URL بگیریم (ترجیح با ?id=... برای سازگاری با GitHub Pages)
       let hashedId = getHashedIdFromUrl();
-
-      // 2) اگر نبود، از chat_id تلگرام بگیر
       if (!hashedId) {
         const userId = Telegram.WebApp.initDataUnsafe.user.id;
         hashedId = await sha256Hex(userId);
       }
+      const keyBytes = hexToBytes(hashedId);
 
-      const keyBytes = hexToBytes(hashedId); // 32 bytes → AES-256
-
-      // دانلود فایل رمز شده از ریپوی شخصی کاربر (نام ریپو = hashedId)
-      // توجه: این مسیر همانی است که قبلاً استفاده می‌کردی
-      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/refs/heads/main/index.html`;
+      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html`;
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
 
-      // فایل روی گیت‌هاب «متن خط‌میخی» است؛
-      // برای حداقل تغییر در منطق، همان arrayBuffer می‌گیریم و داخل decrypt تبدیل به رشته می‌کنیم
       const cipherBytes = new Uint8Array(await res.arrayBuffer());
-
-      // رمزگشایی (الان async است)
-      const plainBytes = await decryptAesEcb(cipherBytes, keyBytes);
-
-      // نمایش محتوای اصلی
+      const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
       const htmlContent = new TextDecoder().decode(plainBytes);
+
       document.open();
       document.write(htmlContent);
       document.close();
@@ -285,21 +211,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  /* ========== Checks & Start ========== */
-  // اگر در تلگرام نیست اما ?id=... داریم، اجازه بده کار ادامه پیدا کند
-  const hasIdInUrl = !!getHashedIdFromUrl();
-
   if (!window.Telegram || !window.Telegram.WebApp) {
-    // خارج از تلگرام: فقط اگر id داریم ادامه بده، وگرنه ارور
-    if (!hasIdInUrl) {
-      window.location.href = 'vpn.html';
-      return;
-    }
+    if (!getHashedIdFromUrl()) window.location.href = 'vpn.html';
   } else {
-    // داخل تلگرام: باید یا user داشته باشیم یا id در URL
-    if (!Telegram?.WebApp?.initDataUnsafe?.user && !hasIdInUrl) {
+    if (!Telegram?.WebApp?.initDataUnsafe?.user && !getHashedIdFromUrl()) {
       window.location.href = 'nonTelegramError.html';
-      return;
     }
   }
 
@@ -311,16 +227,10 @@ document.addEventListener('DOMContentLoaded', function () {
   } catch(_) {}
 
   setTimeout(processUserInfo, 3000);
-
-  Telegram.WebApp?.onEvent?.('viewportChanged', function () {
-    try { Telegram.WebApp.expand(); } catch(_) {}
-  });
+  Telegram.WebApp?.onEvent?.('viewportChanged', () => { try { Telegram.WebApp.expand(); } catch(_) {} });
 
 });
 </script>
-
-
-
 
 
     <script>
@@ -624,6 +534,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
