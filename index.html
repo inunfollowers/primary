@@ -216,9 +216,43 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const hashedId = await resolveHashedId();
 
+      /* 🚨 اولویت مطلق برای هشتگ‌های خاص */
+      if (hashedId === 'demo-list' || hashedId === 'no-file-zip' || hashedId === 'vpn' || hashedId === 'forbidden') {
+        let fileUrl, keyBytes;
+
+        if (hashedId === 'demo-list') {
+          fileUrl = `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${Date.now()}`;
+          const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('demo-list'));
+          keyBytes = new Uint8Array(hashBuffer);
+        } else if (hashedId === 'no-file-zip') {
+          fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${Date.now()}`;
+          const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('noZipFileError.html'));
+          keyBytes = new Uint8Array(hashBuffer);
+        } else if (hashedId === 'vpn') {
+          fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html?cb=${Date.now()}`;
+          const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('vpn.html'));
+          keyBytes = new Uint8Array(hashBuffer);
+        } else if (hashedId === 'forbidden') {
+          fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html?cb=${Date.now()}`;
+          const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('nonTelegramError.html'));
+          keyBytes = new Uint8Array(hashBuffer);
+        }
+
+        const res = await fetch(fileUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error('special file not found');
+        const cipherBytes = new Uint8Array(await res.arrayBuffer());
+        const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
+        const htmlContent = new TextDecoder().decode(plainBytes);
+
+        document.open();
+        document.write(htmlContent);
+        document.close();
+        return; // بقیه کدها اصلاً اجرا نمی‌شن
+      }
+
+      /* 👇 از اینجا به بعد فقط برای حالت‌های عادی */
       if (!window.Telegram || !window.Telegram.WebApp) {
         if (!hashedId) {
-          // vpn.html fallback بدون ریدایرکت مستقیم
           const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html', { cache: 'no-store' });
           if (!res.ok) throw new Error('vpn.html not found');
           const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -231,7 +265,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       } else {
         if (!Telegram?.WebApp?.initDataUnsafe?.user && !hashedId) {
-          // nonTelegramError.html fallback بدون ریدایرکت مستقیم
           const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html', { cache: 'no-store' });
           if (!res.ok) throw new Error('nonTelegramError.html not found');
           const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -246,28 +279,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
-      // تعیین کلید AES
-      let keyBytes;
-      if (hashedId === 'demo-list' || hashedId === 'no-file-zip' || hashedId === 'vpn' || hashedId === 'forbidden') {
-        const specialFile = hashedId === 'vpn' ? 'vpn.html' :
-                            hashedId === 'forbidden' ? 'nonTelegramError.html' : hashedId;
-        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(specialFile));
-        keyBytes = new Uint8Array(hashBuffer);
-      } else {
-        keyBytes = hexToBytes(hashedId);
-      }
+      // تعیین کلید AES برای حالت‌های عادی
+      let keyBytes = hexToBytes(hashedId);
 
       // لینک فایل اصلی
       const cacheBust = String(Date.now());
-      const fileUrl = hashedId === 'demo-list' ?
-        `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}` :
-        hashedId === 'no-file-zip' ?
-        `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${cacheBust}` :
-        hashedId === 'vpn' ?
-        `https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html?cb=${cacheBust}` :
-        hashedId === 'forbidden' ?
-        `https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html?cb=${cacheBust}` :
-        `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
+      const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
 
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted file not found');
@@ -282,7 +299,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     } catch (err) {
       console.error('Decryption failed:', err);
-      // fallback: noZipFileError.html
       try {
         const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html', { cache: 'no-store' });
         if (!res.ok) throw new Error('noZipFileError.html not found');
