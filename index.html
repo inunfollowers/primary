@@ -114,166 +114,198 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  /* ========== Utils ========== */
+  /* ==========================
+     1️⃣ Utility Functions
+  ========================== */
 
+  // SHA-256 یک متن و خروجی هگز
   async function sha256Hex(message) {
     const msgBuffer = new TextEncoder().encode(String(message));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   }
 
+  // تبدیل هگز به بایت
   function hexToBytes(hex) {
     const out = new Uint8Array(hex.length / 2);
     for (let i = 0; i < out.length; i++) {
-      out[i] = parseInt(hex.substr(i * 2, 2), 16);
+      out[i] = parseInt(hex.substr(i*2, 2), 16);
     }
     return out;
   }
 
+  // جدول کاراکترهای خط میخی 0-15
   const cuneiformTable = [
     "𒀀","𒀁","𒀂","𒀃","𒀄","𒀅","𒀆","𒀇",
     "𒀈","𒀉","𒀊","𒀋","𒀌","𒀍","𒀎","𒀏"
   ];
-  const cuneiformIndex = new Map();
-  cuneiformTable.forEach((c, i) => cuneiformIndex.set(c, i));
 
+  const cuneiformIndex = new Map();
+  cuneiformTable.forEach((c,i) => cuneiformIndex.set(c,i));
+
+  // تبدیل رشته خط میخی به بایت
   function cuneiformToBytes(cuniStr) {
     cuniStr = cuniStr.replace(/^[\uFEFF\s]+/, '').replace(/\s+/g, '');
-    const chars = [];
-    for (const ch of cuniStr) chars.push(ch);
-    if (chars.length % 2 !== 0) throw new Error('invalid cuneiform length');
-    const bytes = new Uint8Array(chars.length / 2);
+    if (cuniStr.length % 2 !== 0) throw new Error('invalid cuneiform length');
+    const bytes = new Uint8Array(cuniStr.length / 2);
     let bi = 0;
-    for (let i = 0; i < chars.length; i += 2) {
-      const hi = cuneiformIndex.get(chars[i]);
-      const lo = cuneiformIndex.get(chars[i + 1]);
+    for (let i = 0; i < cuniStr.length; i+=2) {
+      const hi = cuneiformIndex.get(cuniStr[i]);
+      const lo = cuneiformIndex.get(cuniStr[i+1]);
       if (hi === undefined || lo === undefined) throw new Error('invalid cuneiform char');
-      bytes[bi++] = ((hi & 0x0F) << 4) | (lo & 0x0F);
+      bytes[bi++] = ((hi & 0x0F)<<4) | (lo & 0x0F);
     }
     return bytes;
   }
 
+  // AES-GCM رمزگشایی
   async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
     const ctWithTag = new Uint8Array(ct.length + tag.length);
     ctWithTag.set(ct);
     ctWithTag.set(tag, ct.length);
-    const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
-    const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce, tagLength: 128 }, cryptoKey, ctWithTag);
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw', keyBytes, {name:'AES-GCM'}, false, ['decrypt']
+    );
+    const plainBuffer = await crypto.subtle.decrypt(
+      {name:'AES-GCM', iv:nonce, tagLength:128},
+      cryptoKey, ctWithTag
+    );
     return new Uint8Array(plainBuffer);
   }
 
+  // رمزگشایی از خط میخی
   async function decryptAesGcmFromCuneiform(cipherBytes, keyBytes) {
-    const decoder = new TextDecoder('utf-8', { fatal: true });
-    const decoded = decoder.decode(cipherBytes);
-    const cuneiformText = decoded.replace(/^[\uFEFF\s]+/, '');
-    const blob = cuneiformToBytes(cuneiformText);
+    const decoded = new TextDecoder('utf-8', {fatal:true}).decode(cipherBytes);
+    const blob = cuneiformToBytes(decoded);
     if (blob.length < 12 + 16) throw new Error('blob too short');
-    const nonce = blob.slice(0, 12);
-    const tag   = blob.slice(12, 28);
+    const nonce = blob.slice(0,12);
+    const tag   = blob.slice(12,28);
     const ct    = blob.slice(28);
     return await aesGcmDecrypt(keyBytes, nonce, ct, tag);
   }
 
+  // گرفتن هش از URL
   function getHashedIdFromUrl() {
     try {
       const url = new URL(window.location.href);
       const qsId = url.searchParams.get('id');
       if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) return qsId;
 
-      const parts = window.location.pathname.replace(/^\/+/, '').split('/').filter(Boolean);
-      if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) return parts[1];
-      if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) return parts[0];
+      const parts = window.location.pathname.replace(/^\/+/,'').split('/').filter(Boolean);
+      if (parts.length===2 && parts[0].toLowerCase()==='primary' && /^[0-9a-f]{64}$/i.test(parts[1])) return parts[1];
+      if (parts.length===1 && /^[0-9a-f]{64}$/i.test(parts[0])) return parts[0];
     } catch(_) {}
     return null;
   }
 
-  async function waitForTelegramUser(timeoutMs = 8000, intervalMs = 100) {
+  // منتظر شدن برای یوزر تلگرام
+  async function waitForTelegramUser(timeoutMs=8000, intervalMs=100) {
     const started = Date.now();
-    while (Date.now() - started < timeoutMs) {
+    while (Date.now()-started < timeoutMs) {
       const user = window?.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (user && user.id != null) return user;
-      await new Promise(r => setTimeout(r, intervalMs));
+      if (user && user.id!=null) return user;
+      await new Promise(r=>setTimeout(r, intervalMs));
     }
     return null;
   }
 
+  /* ==========================
+     2️⃣ Resolve Hashed ID
+  ========================== */
   async function resolveHashedId() {
     const hash = window.location.hash.toLowerCase();
 
-    // حالت ویژه demo-list: key و repo مستقیم "demo-list"
     if (hash === '#demo-list') return 'demo-list';
-
-    // حالت ویژه no-zip-file: key و repo مستقیم "no-zip-file"
     if (hash === '#no-zip-file') return 'no-zip-file';
 
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
 
     const user = await waitForTelegramUser();
-    if (user && user.id != null) return await sha256Hex(user.id);
+    if (user && user.id!=null) return await sha256Hex(user.id);
 
     return null;
   }
 
+  /* ==========================
+     3️⃣ Load & Decrypt Page
+  ========================== */
+  async function loadEncryptedPage(hashedId) {
+    let keyBytes;
+    if (hashedId === 'demo-list') {
+      keyBytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('demo-list')));
+    } else if (hashedId === 'no-zip-file') {
+      keyBytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('noZipFileError.html')));
+    } else {
+      keyBytes = hexToBytes(hashedId);
+    }
+
+    const cacheBust = String(Date.now());
+    let fileUrl;
+    if (hashedId === 'demo-list') {
+      fileUrl = `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}`;
+    } else if (hashedId === 'no-zip-file') {
+      fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${cacheBust}`;
+    } else {
+      fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
+    }
+
+    const res = await fetch(fileUrl, {cache:'no-store'});
+    if (!res.ok) throw new Error('encrypted file not found');
+
+    const cipherBytes = new Uint8Array(await res.arrayBuffer());
+    const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
+    return new TextDecoder().decode(plainBytes);
+  }
+
+  /* ==========================
+     4️⃣ Main Processing
+  ========================== */
   async function processUserInfo() {
     try {
       const hashedId = await resolveHashedId();
 
       if (!window.Telegram || !window.Telegram.WebApp) {
-        if (!hashedId) {
-          window.location.href = 'vpn.html';
-          return;
-        }
+        if (!hashedId) { window.location.href = 'vpn.html'; return; }
       } else {
         if (!Telegram?.WebApp?.initDataUnsafe?.user && !hashedId) {
-          window.location.href = 'nonTelegramError.html';
-          return;
+          window.location.href = 'nonTelegramError.html'; return;
         }
       }
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
-      let keyBytes;
-      let fileUrl;
-      const cacheBust = String(Date.now());
+      try {
+        const htmlContent = await loadEncryptedPage(hashedId);
+        document.open();
+        document.write(htmlContent);
+        document.close();
+      } catch(err) {
+        console.error('Primary decryption failed:', err);
 
-      if (hashedId === 'demo-list') {
-        const hashBuffer = await crypto.subtle.digest(
-          'SHA-256',
-          new TextEncoder().encode('demo-list')
-        );
-        keyBytes = new Uint8Array(hashBuffer);
-        fileUrl = `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}`;
-      } else if (hashedId === 'no-zip-file') {
-        const hashBuffer = await crypto.subtle.digest(
-          'SHA-256',
-          new TextEncoder().encode('noZipFileError.html')
-        );
-        keyBytes = new Uint8Array(hashBuffer);
-        fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${cacheBust}`;
-      } else {
-        keyBytes = hexToBytes(hashedId);
-        fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
+        // ⚡ Fallback به noZipFileError رمز شده
+        try {
+          const htmlContent = await loadEncryptedPage('no-zip-file');
+          document.open();
+          document.write(htmlContent);
+          document.close();
+        } catch(fallbackErr) {
+          console.error('Fallback decryption failed:', fallbackErr);
+          document.body.innerHTML = '<h1>Page not found</h1>';
+        }
       }
 
-      const res = await fetch(fileUrl, { cache: 'no-store' });
-      if (!res.ok) throw new Error('encrypted index.html not found');
-
-      const cipherBytes = new Uint8Array(await res.arrayBuffer());
-      const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
-      const htmlContent = new TextDecoder().decode(plainBytes);
-
-      document.open();
-      document.write(htmlContent);
-      document.close();
-
-    } catch (err) {
-      console.error('Decryption failed:', err);
-      // دیگر نیازی به ریدایرکت به فایل خام نیست
+    } catch(err) {
+      console.error('Fatal error:', err);
+      document.body.innerHTML = '<h1>Fatal error occurred</h1>';
     }
   }
 
+  /* ==========================
+     5️⃣ Telegram WebApp Customization
+  ========================== */
   Telegram.WebApp?.ready?.();
   try {
     Telegram.WebApp.headerColor = "#ff7eb3";
@@ -289,6 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+
 
 
 
@@ -593,6 +626,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
