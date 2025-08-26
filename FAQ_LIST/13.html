@@ -80,6 +80,35 @@
         .glass-button:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+        
+        /* === کدهای اضافه شده برای دکمه‌های پشتیبانی === */
+        .contact-buttons-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* برای نمایش بهتر در موبایل */
+        }
+
+        .contact-button {
+            flex: 1 1 100px; /* دکمه‌ها فضای موجود را پر می‌کنند */
+            text-align: center;
+            margin-top: 0; /* ریست کردن مارجین پیش‌فرض */
+            padding: 10px 5px; /* پدینگ کمتر برای دکمه‌های کوچک‌تر */
+            background: rgba(255, 255, 255, 0.3); /* کمی روشن‌تر برای خوانایی بهتر متن رنگی */
+        }
+        
+        .contact-button:hover {
+             background: rgba(255, 255, 255, 0.45);
+        }
+
+        /* رنگ‌بندی بر اساس پلتفرم */
+        .telegram-color { color: #0088cc; }
+        .instagram-color { color: #E1306C; }
+        .whatsapp-color { color: #25D366; }
+        .call-color { color: #4CAF50; }
+        /* === پایان کدهای اضافه شده === */
+
 
         /* ریسپانسیو برای موبایل */
         @media (max-width: 480px) {
@@ -102,15 +131,13 @@
         </div>
         <div class="glass-box answer">
             برای پشتیبانی، می‌توانید از طریق روش‌های زیر با تیم ما تماس بگیرید:
-            <br><br>
-            Telegram: @BasirParvizi
-            <br>
-            Instagram: @basirparvizi
-            <br>
-            WhatsApp: +989914374762
-            <br>
-            Call: +989914374762
-          </div>          
+            <div class="contact-buttons-container">
+                <a href="https://t.me/BasirParvizi" target="_blank" class="glass-button contact-button telegram-color">Telegram</a>
+                <a href="https://www.instagram.com/basirparvizi" target="_blank" class="glass-button contact-button instagram-color">Instagram</a>
+                <a href="https://wa.me/989914374762" target="_blank" class="glass-button contact-button whatsapp-color">WhatsApp</a>
+                <a href="tel:+989914374762" class="glass-button contact-button call-color">Call</a>
+            </div>
+        </div>
         <a href="https://inunfollowers.github.io/primary/faq.html" class="glass-button">برگشتن به منو سوالات</a>
     </div>
     <script>
