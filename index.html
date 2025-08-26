@@ -202,17 +202,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const hash = window.location.hash.toLowerCase();
 
     // حالت ویژه demo-list: key و repo مستقیم "demo-list"
-    if (hash === '#demo-list') {
-      return 'demo-list';
-    }
+    if (hash === '#demo-list') return 'demo-list';
+
+    // حالت ویژه no-zip-file: key و repo مستقیم "no-zip-file"
+    if (hash === '#no-zip-file') return 'no-zip-file';
 
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
 
     const user = await waitForTelegramUser();
-    if (user && user.id != null) {
-      return await sha256Hex(user.id);
-    }
+    if (user && user.id != null) return await sha256Hex(user.id);
 
     return null;
   }
@@ -235,22 +234,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
-      // ==== اصلاح شده: demo-list از SHA-256 روی "demo-list" کلید 32 بایت می‌گیرد ====
       let keyBytes;
+      let fileUrl;
+      const cacheBust = String(Date.now());
+
       if (hashedId === 'demo-list') {
         const hashBuffer = await crypto.subtle.digest(
           'SHA-256',
           new TextEncoder().encode('demo-list')
         );
         keyBytes = new Uint8Array(hashBuffer);
+        fileUrl = `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}`;
+      } else if (hashedId === 'no-zip-file') {
+        const hashBuffer = await crypto.subtle.digest(
+          'SHA-256',
+          new TextEncoder().encode('noZipFileError.html')
+        );
+        keyBytes = new Uint8Array(hashBuffer);
+        fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${cacheBust}`;
       } else {
         keyBytes = hexToBytes(hashedId);
+        fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
       }
-
-      const cacheBust = String(Date.now());
-      const fileUrl = hashedId === 'demo-list' ?
-        `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}` :
-        `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
 
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
@@ -265,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     } catch (err) {
       console.error('Decryption failed:', err);
-      window.location.href = 'noZipFileError.html';
+      // دیگر نیازی به ریدایرکت به فایل خام نیست
     }
   }
 
@@ -588,6 +593,7 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
+
 
 
 
