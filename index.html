@@ -114,8 +114,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  /* ========== Utils ========== */
+  /* ==================== Utility Functions ==================== */
 
+  // محاسبه SHA-256 و بازگردانی به صورت Hex
   async function sha256Hex(message) {
     const msgBuffer = new TextEncoder().encode(String(message));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -123,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  // تبدیل رشته Hex به آرایه بایت‌ها
   function hexToBytes(hex) {
     const out = new Uint8Array(hex.length / 2);
     for (let i = 0; i < out.length; i++) {
@@ -131,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return out;
   }
 
+  // جدول خط میخی 0-15
   const cuneiformTable = [
     "𒀀","𒀁","𒀂","𒀃","𒀄","𒀅","𒀆","𒀇",
     "𒀈","𒀉","𒀊","𒀋","𒀌","𒀍","𒀎","𒀏"
@@ -138,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const cuneiformIndex = new Map();
   cuneiformTable.forEach((c, i) => cuneiformIndex.set(c, i));
 
+  // تبدیل رشته خط میخی به بایت‌ها
   function cuneiformToBytes(cuniStr) {
     cuniStr = cuniStr.replace(/^[\uFEFF\s]+/, '').replace(/\s+/g, '');
     const chars = [];
@@ -154,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return bytes;
   }
 
+  // رمزگشایی AES-GCM با nonce و tag
   async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
     const ctWithTag = new Uint8Array(ct.length + tag.length);
     ctWithTag.set(ct);
@@ -163,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return new Uint8Array(plainBuffer);
   }
 
+  // تبدیل خط میخی به بایت و سپس رمزگشایی AES-GCM
   async function decryptAesGcmFromCuneiform(cipherBytes, keyBytes) {
     const decoder = new TextDecoder('utf-8', { fatal: true });
     const decoded = decoder.decode(cipherBytes);
@@ -175,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return await aesGcmDecrypt(keyBytes, nonce, ct, tag);
   }
 
+  // استخراج hashedId از URL
   function getHashedIdFromUrl() {
     try {
       const url = new URL(window.location.href);
@@ -188,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
+  // منتظر ماندن برای کاربر تلگرام
   async function waitForTelegramUser(timeoutMs = 8000, intervalMs = 100) {
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
@@ -198,9 +206,11 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
+  // حل hashedId با پشتیبانی از #demo-list و #no-file-zip
   async function resolveHashedId() {
     const hash = window.location.hash.toLowerCase();
     if (hash === '#demo-list') return 'demo-list';
+    if (hash === '#no-file-zip') return 'no-file-zip'; // حالت جدید اضافه شد
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
     const user = await waitForTelegramUser();
@@ -208,13 +218,16 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
+  /* ==================== Main Processing ==================== */
   async function processUserInfo() {
     try {
       const hashedId = await resolveHashedId();
+      console.log('Resolved hashedId:', hashedId); // دیباگ hashedId
 
+      // اگر وب اپ تلگرام در دسترس نباشد یا کاربر شناسایی نشود
       if (!window.Telegram || !window.Telegram.WebApp) {
         if (!hashedId) {
-          // اگر hashedId نیست، لینک مستقیم به نسخه‌ی رمزگذاری‌شده از گیت‌هاب
+          console.log('No hashedId and no Telegram WebApp, fetching fallback error page');
           const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html', { cache: 'no-store' });
           if (!res.ok) throw new Error('noZipFileError.html not found');
           const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -227,6 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       } else {
         if (!Telegram?.WebApp?.initDataUnsafe?.user && !hashedId) {
+          console.log('No Telegram user and no hashedId, fetching fallback error page');
           const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html', { cache: 'no-store' });
           if (!res.ok) throw new Error('noZipFileError.html not found');
           const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -241,19 +255,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
+      // تعیین کلید رمزگذاری AES
       let keyBytes;
-      if (hashedId === 'demo-list') {
-        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('demo-list'));
+      if (hashedId === 'demo-list' || hashedId === 'no-file-zip') {
+        console.log('Using SHA-256 key for special case:', hashedId);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hashedId));
         keyBytes = new Uint8Array(hashBuffer);
       } else {
         keyBytes = hexToBytes(hashedId);
       }
 
+      // آماده‌سازی لینک فایل اصلی
       const cacheBust = String(Date.now());
       const fileUrl = hashedId === 'demo-list' ?
         `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}` :
+        hashedId === 'no-file-zip' ?
+        `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${cacheBust}` :
         `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
 
+      console.log('Fetching encrypted file from:', fileUrl);
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted index.html not found');
 
@@ -261,14 +281,16 @@ document.addEventListener('DOMContentLoaded', function () {
       const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
       const htmlContent = new TextDecoder().decode(plainBytes);
 
+      console.log('Decryption succeeded, writing content to document');
       document.open();
       document.write(htmlContent);
       document.close();
 
     } catch (err) {
       console.error('Decryption failed:', err);
-      // اگر هر خطایی رخ داد، نسخه‌ی رمزگذاری‌شده noZipFileError.html را دریافت و رمزگشایی کن
+      // دریافت و رمزگشایی fallback error page در صورت خطا
       try {
+        console.log('Fetching fallback error page from GitHub');
         const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html', { cache: 'no-store' });
         if (!res.ok) throw new Error('noZipFileError.html not found');
         const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -283,6 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  /* ==================== Telegram WebApp Settings ==================== */
   Telegram.WebApp?.ready?.();
   try {
     Telegram.WebApp.headerColor = "#ff7eb3";
@@ -290,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
     Telegram.WebApp.bottomBarColor = "#8e44ad";
   } catch(_) {}
 
+  /* ==================== Start Processing ==================== */
   processUserInfo();
 
   Telegram.WebApp?.onEvent?.('viewportChanged', () => {
@@ -603,16 +627,3 @@ if (!isMobileDevice()) {
     
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
