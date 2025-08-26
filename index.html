@@ -202,6 +202,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const hash = window.location.hash.toLowerCase();
     if (hash === '#demo-list') return 'demo-list';
     if (hash === '#no-file-zip') return 'no-file-zip';
+    if (hash === '#forbidden') return 'forbidden';
+    if (hash === '#vpn') return 'vpn';
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
     const user = await waitForTelegramUser();
@@ -216,33 +218,59 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!window.Telegram || !window.Telegram.WebApp) {
         if (!hashedId) {
-          window.location.href = 'vpn.html';
+          // vpn.html fallback بدون ریدایرکت مستقیم
+          const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html', { cache: 'no-store' });
+          if (!res.ok) throw new Error('vpn.html not found');
+          const cipherBytes = new Uint8Array(await res.arrayBuffer());
+          const keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('vpn.html'));
+          const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, new Uint8Array(keyBytes));
+          document.open();
+          document.write(new TextDecoder().decode(plainBytes));
+          document.close();
           return;
         }
       } else {
         if (!Telegram?.WebApp?.initDataUnsafe?.user && !hashedId) {
-          window.location.href = 'nonTelegramError.html';
+          // nonTelegramError.html fallback بدون ریدایرکت مستقیم
+          const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html', { cache: 'no-store' });
+          if (!res.ok) throw new Error('nonTelegramError.html not found');
+          const cipherBytes = new Uint8Array(await res.arrayBuffer());
+          const keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('nonTelegramError.html'));
+          const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, new Uint8Array(keyBytes));
+          document.open();
+          document.write(new TextDecoder().decode(plainBytes));
+          document.close();
           return;
         }
       }
 
       if (!hashedId) throw new Error('hashedId not resolvable');
 
+      // تعیین کلید AES
       let keyBytes;
-      if (hashedId === 'demo-list' || hashedId === 'no-file-zip') {
-        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hashedId));
+      if (hashedId === 'demo-list' || hashedId === 'no-file-zip' || hashedId === 'vpn' || hashedId === 'forbidden') {
+        const specialFile = hashedId === 'vpn' ? 'vpn.html' :
+                            hashedId === 'forbidden' ? 'nonTelegramError.html' : hashedId;
+        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(specialFile));
         keyBytes = new Uint8Array(hashBuffer);
       } else {
         keyBytes = hexToBytes(hashedId);
       }
 
+      // لینک فایل اصلی
       const cacheBust = String(Date.now());
       const fileUrl = hashedId === 'demo-list' ?
         `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${cacheBust}` :
+        hashedId === 'no-file-zip' ?
+        `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${cacheBust}` :
+        hashedId === 'vpn' ?
+        `https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html?cb=${cacheBust}` :
+        hashedId === 'forbidden' ?
+        `https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html?cb=${cacheBust}` :
         `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
 
       const res = await fetch(fileUrl, { cache: 'no-store' });
-      if (!res.ok) throw new Error('encrypted index.html not found');
+      if (!res.ok) throw new Error('encrypted file not found');
 
       const cipherBytes = new Uint8Array(await res.arrayBuffer());
       const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
@@ -254,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     } catch (err) {
       console.error('Decryption failed:', err);
-      // fallback: دریافت و رمزگشایی noZipFileError.html بدون ریدایرکت
+      // fallback: noZipFileError.html
       try {
         const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html', { cache: 'no-store' });
         if (!res.ok) throw new Error('noZipFileError.html not found');
@@ -286,7 +314,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
-
 
 
 
