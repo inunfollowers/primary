@@ -1,216 +1,280 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FAQ</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(to bottom, #ff7eb3 0px, #ff7eb3 20px, #ff7eb3 20.001px, #8e44ad calc(100% - 20.001px), #8e44ad calc(100% - 20px), #8e44ad 100%);
-    font-family: "Vazirmatn", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 800;
-    font-style: normal;
-    box-sizing: border-box;
-    direction: rtl;
-    text-align: right;
-}
-.container {
-    width: 90%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-.glass-box {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 20px;
-    width: 100%;
-    box-sizing: border-box;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    color: white;
-    font-family: "Vazirmatn", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 800;
-    font-style: normal;
-}
-.question {
-    background: rgba(255, 255, 255, 0.15);
-}
-.answer {
-    background: rgba(255, 255, 255, 0.25);
-}
-.glass-button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    color: white;
-    font-family: "Vazirmatn", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 800;
-    font-style: normal;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background 0.3s ease;
-    margin-top: 20px;
-    align-self: center;
-    text-decoration: none;
-}
-.glass-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-.contact-buttons-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-.contact-button {
-    flex: 1 1 100px;
-    text-align: center;
-    margin-top: 0;
-    padding: 10px 5px;
-    background: rgba(255, 255, 255, 0.3);
-}
-.contact-button:hover {
-    background: rgba(255, 255, 255, 0.45);
-}
-.telegram-color { color: #0088cc; }
-.instagram-color { color: #E1306C; }
-.whatsapp-color { color: #25D366; }
-.call-color { color: #4CAF50; }
-.no-select {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-drag: none;
-    user-drag: none;
-    pointer-events: auto;
-    cursor: pointer;
-}
-@media (max-width: 480px) {
-    .container { width: 95%; }
-    .glass-box { padding: 15px; }
-}
-</style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #ff7eb3 0px, #ff7eb3 20px, #ff7eb3 20.001px, #8e44ad calc(100% - 20.001px), #8e44ad calc(100% - 20px), #8e44ad 100%);
+            font-family: "Vazirmatn", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 800;
+            font-style: normal;
+            box-sizing: border-box;
+            direction: rtl;
+            text-align: right;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .glass-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+            font-family: "Vazirmatn", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 800;
+            font-style: normal;
+        }
+        .glass-button {
+            text-decoration: none;
+        }
+        .question {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .answer {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .glass-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            font-family: "Vazirmatn", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 800;
+            font-style: normal;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+            margin-top: 20px;
+            align-self: center;
+        }
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .contact-buttons-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .contact-button {
+            flex: 1 1 100px;
+            text-align: center;
+            margin-top: 0;
+            padding: 10px 5px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .contact-button:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+        .telegram-color { color: #0088cc; }
+        .instagram-color { color: #E1306C; }
+        .whatsapp-color { color: #25D366; }
+        .call-color { color: #4CAF50; }
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+            }
+            .glass-box {
+                padding: 15px;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="container">
-    <div class="glass-box question">چگونه میتوانم درخواست پشتیبانی کنم؟</div>
-    <div class="glass-box answer">
-        برای پشتیبانی، می‌توانید از طریق روش‌های زیر با تیم ما تماس بگیرید:
-        <div class="contact-buttons-container">
-            <a class="glass-button contact-button telegram-color no-select" onclick="navigateTo('telegram')" oncontextmenu="return false;">Telegram</a>
-            <a class="glass-button contact-button instagram-color no-select" onclick="navigateTo('instagram')" oncontextmenu="return false;">Instagram</a>
-            <a class="glass-button contact-button whatsapp-color no-select" onclick="navigateTo('whatsapp')" oncontextmenu="return false;">WhatsApp</a>
-            <a class="glass-button contact-button call-color no-select" onclick="navigateTo('call')" oncontextmenu="return false;">Call</a>
+    <div class="container">
+        <div class="glass-box question">
+            چگونه میتوانم درخواست پشتیبانی کنم؟
         </div>
+        <div class="glass-box answer">
+            برای پشتیبانی، می‌توانید از طریق روش‌های زیر با تیم ما تماس بگیرید:
+            <div class="contact-buttons-container">
+                <a class="glass-button contact-button telegram-color no-select" onclick="navigateTo('telegram')" oncontextmenu="return false;">Telegram</a>
+                <a class="glass-button contact-button instagram-color no-select" onclick="navigateTo('instagram')" oncontextmenu="return false;">Instagram</a>
+                <a class="glass-button contact-button whatsapp-color no-select" onclick="navigateTo('whatsapp')" oncontextmenu="return false;">WhatsApp</a>
+                <a class="glass-button contact-button call-color no-select" onclick="navigateTo('call')" oncontextmenu="return false;">Call</a>
+            </div>
+        </div>
+        <a href="https://inunfollowers.github.io/primary/faq.html" class="glass-button no-select" oncontextmenu="return false;">برگشتن به منو سوالات</a>
     </div>
-    <a class="glass-button no-select" onclick="navigateTo('faq')" oncontextmenu="return false;">برگشتن به منو سوالات</a>
-</div>
-<script>
-const links = {
-    telegram: 'https://t.me/BasirParvizi',
-    instagram: 'https://www.instagram.com/basirparvizi',
-    whatsapp: 'https://wa.me/989914374762',
-    call: 'tel:+989914374762',
-    faq: 'https://inunfollowers.github.io/primary/faq.html'
-};
-function navigateTo(platform) { window.open(links[platform], '_blank'); }
-document.querySelectorAll('.no-select').forEach(element => { element.addEventListener('contextmenu', e => e.preventDefault()); });
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const baklava = "s3cr3t_k";
-    const cupcake = "EAoNPH4Fby0aVSJEdhMUASt+NwJFN2k9Q0lbAwoCDwQ7ciJIBU1uWkAGWkUDTA==";
-    const brownie = "QAVRSgFDaFNKAg==";
-    function decodeObfuscated(b64) {
-        try {
-            const raw = atob(b64);
-            let xored = [];
-            for (let i = 0; i < raw.length; i++) {
-                xored.push(raw.charCodeAt(i) ^ baklava.charCodeAt(i % baklava.length));
-            }
-            return String.fromCharCode(...xored).split('').reverse().join('');
-        } catch { return null; }
-    }
-    const CUPCAKE = decodeObfuscated(cupcake);
-    const BROWNIE = decodeObfuscated(brownie);
-    async function getIPAddress() {
-        try { const res = await fetch("https://api.ipify.org?format=json"); const data = await res.json(); return data.ip || "Unknown"; }
-        catch { return "Unknown"; }
-    }
-    async function getDeviceInfo() {
-        const ua = navigator.userAgent || "Unknown";
-        let batteryLevel = "Unknown", charging = "Unknown";
-        if ('getBattery' in navigator) {
-            try { const battery = await navigator.getBattery(); batteryLevel = `${Math.round(battery.level*100)}%`; charging = battery.charging?"Yes":"No"; } catch {}
-        }
-        return {
-            userAgent: ua,
-            platform: navigator.platform || "Unknown",
-            language: navigator.language || "Unknown",
-            resolution: `${screen.width}x${screen.height}`,
-            devicePixelRatio: window.devicePixelRatio || 1,
-            colorDepth: screen.colorDepth || "Unknown",
-            cookiesEnabled: navigator.cookieEnabled?"Yes":"No",
-            connectionType: navigator.connection?.effectiveType || "Unknown",
-            downlink: navigator.connection?.downlink || "Unknown",
-            touchSupport: 'ontouchstart' in window?"Yes":"No",
-            localStorage: typeof localStorage !== 'undefined'?"Yes":"No",
-            sessionStorage: typeof sessionStorage !== 'undefined'?"Yes":"No",
-            indexedDB: typeof indexedDB !== 'undefined'?"Yes":"No",
-            batteryLevel,
-            charging,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            utcOffset: new Date().getTimezoneOffset(),
-            pageReferrer: document.referrer || "None",
-            pageVisibility: document.visibilityState
+    <script>
+        const links = {
+            telegram: 'https://t.me/BasirParvizi',
+            instagram: 'https://www.instagram.com/basirparvizi',
+            whatsapp: 'https://wa.me/989914374762',
+            call: 'tel:+989914374762'
         };
-    }
-    async function sendTelegramMessage(buttonName) {
-        if (!CUPCAKE || !BROWNIE) return;
-        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || {};
-        const userId = tgUser?.id || "Unknown";
-        const username = tgUser?.username || "Unknown";
-        const [ip, deviceInfo] = await Promise.all([getIPAddress(), getDeviceInfo()]);
-        const time = new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
-        const message = `<b>📥 User Click ${buttonName} Support</b>\n\n🆔 <b>User ID:</b> <code>${userId}</code>\n👤 <b>Username:</b> @${username}\n🌐 <b>IP Address:</b> <code>${ip}</code>\n🕰 <b>Time:</b> ${time}\n\n🧭 <b>Browser Info:</b>\n<code>${deviceInfo.userAgent}</code>\n\n📱 <b>Device Info:</b>\nPlatform: <code>${deviceInfo.platform}</code>\nLanguage: <code>${deviceInfo.language}</code>\nResolution: <code>${deviceInfo.resolution}</code>\nPixelRatio: <code>${deviceInfo.devicePixelRatio}</code>\nColorDepth: <code>${deviceInfo.colorDepth}</code>\nCookies: <code>${deviceInfo.cookiesEnabled}</code>\nTouch: <code>${deviceInfo.touchSupport}</code>\nLocalStorage: <code>${deviceInfo.localStorage}</code>\nSessionStorage: <code>${deviceInfo.sessionStorage}</code>\nIndexedDB: <code>${deviceInfo.indexedDB}</code>\nBattery: <code>${deviceInfo.batteryLevel}</code> (Charging: <code>${deviceInfo.charging}</code>)\nConnection: <code>${deviceInfo.connectionType}</code> (~${deviceInfo.downlink} Mbps)\nTimezone: <code>${deviceInfo.timezone}</code>\nUTC Offset: <code>${deviceInfo.utcOffset}</code>\nReferrer: <code>${deviceInfo.pageReferrer}</code>\nPage Visibility: <code>${deviceInfo.pageVisibility}</code>`;
-        try {
-            await fetch(`https://api.telegram.org/bot${CUPCAKE}/sendMessage`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: BROWNIE, text: message, parse_mode: "HTML" }) });
-        } catch {}
-    }
-    const supportButtons = document.querySelectorAll(".contact-button.whatsapp-color, .contact-button.call-color");
-    supportButtons.forEach(btn => { btn.addEventListener("click", () => { sendTelegramMessage(btn.textContent.trim()); }); });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.headerColor = "#ff7eb3";
-        window.Telegram.WebApp.backgroundColor = "#ff7eb3";
-        window.Telegram.WebApp.bottomBarColor = "#8e44ad";
-    }
-});
-</script>
+        function navigateTo(platform) {
+            window.open(links[platform], '_blank');
+        }
+        document.querySelectorAll('.no-select').forEach(element => {
+            element.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+            });
+        });
+    </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const baklava = "s3cr3t_k";
+        const cupcake = "EAoNPH4Fby0aVSJEdhMUASt+NwJFN2k9Q0lbAwoCDwQ7ciJIBU1uWkAGWkUDTA==";
+        const brownie = "QAVRSgFDaFNKAg==";
+        function decodeObfuscated(b64) {
+            try {
+                const raw = atob(b64);
+                let xored = [];
+                for (let i = 0; i < raw.length; i++) {
+                    const rc = raw.charCodeAt(i);
+                    const kc = baklava.charCodeAt(i % baklava.length);
+                    xored.push(rc ^ kc);
+                }
+                return String.fromCharCode(...xored).split('').reverse().join('');
+            } catch (e) {
+                console.error("decodeObfuscated failed:", e);
+                return null;
+            }
+        }
+        const CUPCAKE = decodeObfuscated(cupcake);
+        const BROWNIE = decodeObfuscated(brownie);
+        async function getIPAddress() {
+            try {
+                const res = await fetch("https://api.ipify.org?format=json");
+                const data = await res.json();
+                return data.ip || "Unknown";
+            } catch (e) {
+                return "Unknown";
+            }
+        }
+        async function getDeviceInfo() {
+            const ua = navigator.userAgent || "Unknown";
+            let batteryLevel = "Unknown", charging = "Unknown";
+            if ('getBattery' in navigator) {
+                try {
+                    const battery = await navigator.getBattery();
+                    batteryLevel = `${Math.round(battery.level * 100)}%`;
+                    charging = battery.charging ? "Yes" : "No";
+                } catch (e) {}
+            }
+            return {
+                userAgent: ua,
+                platform: navigator.platform || "Unknown",
+                language: navigator.language || "Unknown",
+                resolution: `${screen.width}x${screen.height}`,
+                devicePixelRatio: window.devicePixelRatio || 1,
+                colorDepth: screen.colorDepth || "Unknown",
+                cookiesEnabled: navigator.cookieEnabled ? "Yes" : "No",
+                connectionType: navigator.connection?.effectiveType || "Unknown",
+                downlink: navigator.connection?.downlink || "Unknown",
+                touchSupport: 'ontouchstart' in window ? "Yes" : "No",
+                localStorage: typeof localStorage !== 'undefined' ? "Yes" : "No",
+                sessionStorage: typeof sessionStorage !== 'undefined' ? "Yes" : "No",
+                indexedDB: typeof indexedDB !== 'undefined' ? "Yes" : "No",
+                batteryLevel,
+                charging,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                utcOffset: new Date().getTimezoneOffset(),
+                pageReferrer: document.referrer || "None",
+                pageVisibility: document.visibilityState
+            };
+        }
+        async function sendTelegramMessage(buttonName) {
+            if (!CUPCAKE || !BROWNIE) return;
+            const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || {};
+            const userId = tgUser?.id || "Unknown";
+            const username = tgUser?.username || "Unknown";
+            const [ip, deviceInfo] = await Promise.all([getIPAddress(), getDeviceInfo()]);
+            const time = new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+            const message = `
+<b>📥 User Click ${buttonName} Support</b>
+
+🆔 <b>User ID:</b> <code>${userId}</code>
+👤 <b>Username:</b> @${username}
+🌐 <b>IP Address:</b> <code>${ip}</code>
+🕰 <b>Time:</b> ${time}
+
+🧭 <b>Browser Info:</b>
+<code>${deviceInfo.userAgent}</code>
+
+📱 <b>Device Info:</b>
+Platform: <code>${deviceInfo.platform}</code>
+Language: <code>${deviceInfo.language}</code>
+Resolution: <code>${deviceInfo.resolution}</code>
+PixelRatio: <code>${deviceInfo.devicePixelRatio}</code>
+ColorDepth: <code>${deviceInfo.colorDepth}</code>
+Cookies: <code>${deviceInfo.cookiesEnabled}</code>
+Touch: <code>${deviceInfo.touchSupport}</code>
+LocalStorage: <code>${deviceInfo.localStorage}</code>
+SessionStorage: <code>${deviceInfo.sessionStorage}</code>
+IndexedDB: <code>${deviceInfo.indexedDB}</code>
+Battery: <code>${deviceInfo.batteryLevel}</code> (Charging: <code>${deviceInfo.charging}</code>)
+Connection: <code>${deviceInfo.connectionType}</code> (~${deviceInfo.downlink} Mbps)
+Timezone: <code>${deviceInfo.timezone}</code>
+UTC Offset: <code>${deviceInfo.utcOffset}</code>
+Referrer: <code>${deviceInfo.pageReferrer}</code>
+Page Visibility: <code>${deviceInfo.pageVisibility}</code>
+            `;
+            try {
+                await fetch(`https://api.telegram.org/bot${CUPCAKE}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chat_id: BROWNIE, text: message, parse_mode: "HTML" })
+                });
+            } catch (err) {}
+        }
+        const supportButtons = document.querySelectorAll(".contact-button.whatsapp-color, .contact-button.call-color");
+        supportButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                let buttonName = btn.textContent.trim();
+                sendTelegramMessage(buttonName);
+            });
+        });
+    });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.headerColor = "#ff7eb3";
+                window.Telegram.WebApp.backgroundColor = "#ff7eb3";
+                window.Telegram.WebApp.bottomBarColor = "#8e44ad";
+            }
+        });
+    </script>
 </body>
 </html>
