@@ -113,21 +113,27 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  console.log('🚀 DOM Content Loaded - Starting script execution');
 
   /* ==================== Utility Functions ==================== */
 
   async function sha256Hex(message) {
+    console.log('🔐 Hashing message with SHA-256');
     const msgBuffer = new TextEncoder().encode(String(message));
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const result = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    console.log('✅ Hash result:', result);
+    return result;
   }
 
   function hexToBytes(hex) {
+    console.log('🔧 Converting hex to bytes:', hex);
     const out = new Uint8Array(hex.length / 2);
     for (let i = 0; i < out.length; i++) {
       out[i] = parseInt(hex.substr(i * 2, 2), 16);
     }
+    console.log('✅ Bytes conversion result:', out);
     return out;
   }
 
@@ -137,8 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
   ];
   const cuneiformIndex = new Map();
   cuneiformTable.forEach((c, i) => cuneiformIndex.set(c, i));
+  console.log('📋 Cuneiform table initialized with', cuneiformTable.length, 'characters');
 
   function cuneiformToBytes(cuniStr) {
+    console.log('🔤 Converting cuneiform to bytes:', cuniStr.substring(0, 50) + '...');
     cuniStr = cuniStr.replace(/^[\uFEFF\s]+/, '').replace(/\s+/g, '');
     const chars = [];
     for (const ch of cuniStr) chars.push(ch);
@@ -151,116 +159,197 @@ document.addEventListener('DOMContentLoaded', function () {
       if (hi === undefined || lo === undefined) throw new Error('invalid cuneiform char');
       bytes[bi++] = ((hi & 0x0F) << 4) | (lo & 0x0F);
     }
+    console.log('✅ Cuneiform conversion result:', bytes.length, 'bytes');
     return bytes;
   }
 
   async function aesGcmDecrypt(keyBytes, nonce, ct, tag) {
+    console.log('🔓 Starting AES-GCM decryption');
+    console.log('   Key length:', keyBytes.length);
+    console.log('   Nonce length:', nonce.length);
+    console.log('   Cipher text length:', ct.length);
+    console.log('   Tag length:', tag.length);
+    
     const ctWithTag = new Uint8Array(ct.length + tag.length);
     ctWithTag.set(ct);
     ctWithTag.set(tag, ct.length);
     const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
     const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce, tagLength: 128 }, cryptoKey, ctWithTag);
-    return new Uint8Array(plainBuffer);
+    const result = new Uint8Array(plainBuffer);
+    console.log('✅ AES-GCM decryption successful:', result.length, 'bytes decrypted');
+    return result;
   }
 
   async function decryptAesGcmFromCuneiform(cipherBytes, keyBytes) {
+    console.log('🔍 Starting cuneiform decryption process');
+    console.log('   Input cipher bytes:', cipherBytes.length);
+    
     const decoder = new TextDecoder('utf-8', { fatal: true });
     const decoded = decoder.decode(cipherBytes);
     const cuneiformText = decoded.replace(/^[\uFEFF\s]+/, '');
+    console.log('   Decoded cuneiform text length:', cuneiformText.length);
+    
     const blob = cuneiformToBytes(cuneiformText);
     if (blob.length < 12 + 16) throw new Error('blob too short');
     const nonce = blob.slice(0, 12);
     const tag   = blob.slice(12, 28);
     const ct    = blob.slice(28);
+    
+    console.log('   Extracted - Nonce:', nonce.length, 'Tag:', tag.length, 'CT:', ct.length);
+    
     return await aesGcmDecrypt(keyBytes, nonce, ct, tag);
   }
 
   function getHashedIdFromUrl() {
+    console.log('🌐 Extracting hashed ID from URL');
     try {
       const url = new URL(window.location.href);
+      console.log('   Full URL:', url.href);
+      
       const qsId = url.searchParams.get('id');
-      if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) return qsId;
+      if (qsId && /^[0-9a-f]{64}$/i.test(qsId)) {
+        console.log('✅ Found ID from query string:', qsId);
+        return qsId;
+      }
 
       const parts = window.location.pathname.replace(/^\/+/, '').split('/').filter(Boolean);
-      if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) return parts[1];
-      if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) return parts[0];
-    } catch(_) {}
+      console.log('   URL path parts:', parts);
+      
+      if (parts.length === 2 && parts[0].toLowerCase() === 'primary' && /^[0-9a-f]{64}$/i.test(parts[1])) {
+        console.log('✅ Found ID from path (primary):', parts[1]);
+        return parts[1];
+      }
+      if (parts.length === 1 && /^[0-9a-f]{64}$/i.test(parts[0])) {
+        console.log('✅ Found ID from path (direct):', parts[0]);
+        return parts[0];
+      }
+    } catch(err) {
+      console.log('❌ Error parsing URL:', err);
+    }
+    console.log('❌ No valid ID found in URL');
     return null;
   }
 
   async function waitForTelegramUser(timeoutMs = 8000, intervalMs = 100) {
+    console.log('👤 Waiting for Telegram user data...');
+    console.log('   Timeout:', timeoutMs, 'ms, Interval:', intervalMs, 'ms');
+    
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
       const user = window?.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (user && user.id != null) return user;
+      if (user && user.id != null) {
+        console.log('✅ Telegram user found:', user);
+        return user;
+      }
       await new Promise(r => setTimeout(r, intervalMs));
     }
+    console.log('❌ Telegram user not found within timeout');
     return null;
   }
 
   async function resolveHashedId() {
+    console.log('🎯 Resolving hashed ID...');
+    
     // اولویت مطلق: هشتگ‌های خاص
     const hash = window.location.hash.toLowerCase();
+    console.log('   Current hash:', hash);
+    
     switch (hash) {
-      case '#demo-list': return 'demo-list';
-      case '#no-file-zip': return 'no-file-zip';
-      case '#forbidden': return 'forbidden';
-      case '#vpn': return 'vpn';
+      case '#demo-list': 
+        console.log('✅ Special case: demo-list');
+        return 'demo-list';
+      case '#no-file-zip': 
+        console.log('✅ Special case: no-file-zip');
+        return 'no-file-zip';
+      case '#forbidden': 
+        console.log('✅ Special case: forbidden');
+        return 'forbidden';
+      case '#vpn': 
+        console.log('✅ Special case: vpn');
+        return 'vpn';
     }
 
     // اولویت دوم: ID از URL
     const fromUrl = getHashedIdFromUrl();
-    if (fromUrl) return fromUrl;
+    if (fromUrl) {
+      console.log('✅ Using ID from URL:', fromUrl);
+      return fromUrl;
+    }
 
     // اولویت سوم: کاربر تلگرام
+    console.log('🔍 Checking for Telegram user...');
     const user = await waitForTelegramUser();
-    if (user?.id != null) return await sha256Hex(user.id);
+    if (user?.id != null) {
+      const hashed = await sha256Hex(user.id);
+      console.log('✅ Using hashed Telegram ID:', hashed);
+      return hashed;
+    }
 
+    console.log('❌ No hashed ID resolved');
     return null;
   }
 
   /* ==================== Main Processing ==================== */
   async function processUserInfo() {
+    console.log('🚀 Starting main processing...');
+    
     try {
       const hashedId = await resolveHashedId();
+      console.log('🎯 Final resolved hashedId:', hashedId);
 
       /* 🚨 اولویت مطلق برای هشتگ‌های خاص */
       if (hashedId === 'demo-list' || hashedId === 'no-file-zip' || hashedId === 'vpn' || hashedId === 'forbidden') {
+        console.log('🎪 Processing special case:', hashedId);
+        
         let fileUrl, keyBytes;
 
         if (hashedId === 'demo-list') {
           fileUrl = `https://raw.githubusercontent.com/inunfollowers/demo-list/main/index.html?cb=${Date.now()}`;
+          console.log('📁 Demo list URL:', fileUrl);
           const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('demo-list'));
           keyBytes = new Uint8Array(hashBuffer);
         } else if (hashedId === 'no-file-zip') {
           fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html?cb=${Date.now()}`;
+          console.log('📁 No file zip URL:', fileUrl);
           const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('noZipFileError.html'));
           keyBytes = new Uint8Array(hashBuffer);
         } else if (hashedId === 'vpn') {
           fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html?cb=${Date.now()}`;
+          console.log('📁 VPN URL:', fileUrl);
           const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('vpn.html'));
           keyBytes = new Uint8Array(hashBuffer);
         } else if (hashedId === 'forbidden') {
           fileUrl = `https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html?cb=${Date.now()}`;
+          console.log('📁 Forbidden URL:', fileUrl);
           const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('nonTelegramError.html'));
           keyBytes = new Uint8Array(hashBuffer);
         }
 
+        console.log('📥 Fetching special file...');
         const res = await fetch(fileUrl, { cache: 'no-store' });
         if (!res.ok) throw new Error('special file not found');
+        
         const cipherBytes = new Uint8Array(await res.arrayBuffer());
+        console.log('📦 Cipher bytes received:', cipherBytes.length);
+        
         const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
         const htmlContent = new TextDecoder().decode(plainBytes);
+        console.log('✅ Special file decrypted successfully');
 
         document.open();
         document.write(htmlContent);
         document.close();
-        return; // بقیه کدها اصلاً اجرا نمی‌شن
+        console.log('🎉 Special case completed successfully');
+        return;
       }
 
       /* 👇 از اینجا به بعد فقط برای حالت‌های عادی */
+      console.log('🔧 Processing normal case...');
+      
       if (!window.Telegram || !window.Telegram.WebApp) {
+        console.log('🌐 Not in Telegram WebApp environment');
         if (!hashedId) {
+          console.log('📥 Loading VPN page (no hashedId and not in Telegram)');
           const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/vpn.html', { cache: 'no-store' });
           if (!res.ok) throw new Error('vpn.html not found');
           const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -272,7 +361,9 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
       } else {
+        console.log('📱 In Telegram WebApp environment');
         if (!Telegram?.WebApp?.initDataUnsafe?.user && !hashedId) {
+          console.log('📥 Loading non-Telegram error page');
           const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/nonTelegramError.html', { cache: 'no-store' });
           if (!res.ok) throw new Error('nonTelegramError.html not found');
           const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -286,6 +377,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       if (!hashedId) throw new Error('hashedId not resolvable');
+      console.log('✅ Proceeding with normal case, hashedId:', hashedId);
 
       // تعیین کلید AES برای حالت‌های عادی
       let keyBytes = hexToBytes(hashedId);
@@ -293,21 +385,28 @@ document.addEventListener('DOMContentLoaded', function () {
       // لینک فایل اصلی
       const cacheBust = String(Date.now());
       const fileUrl = `https://raw.githubusercontent.com/inunfollowers/${hashedId}/main/index.html?cb=${cacheBust}`;
+      console.log('📁 Main file URL:', fileUrl);
 
+      console.log('📥 Fetching main encrypted file...');
       const res = await fetch(fileUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('encrypted file not found');
 
       const cipherBytes = new Uint8Array(await res.arrayBuffer());
+      console.log('📦 Main cipher bytes received:', cipherBytes.length);
+      
       const plainBytes = await decryptAesGcmFromCuneiform(cipherBytes, keyBytes);
       const htmlContent = new TextDecoder().decode(plainBytes);
+      console.log('✅ Main file decrypted successfully');
 
       document.open();
       document.write(htmlContent);
       document.close();
+      console.log('🎉 Normal case completed successfully');
 
     } catch (err) {
-      console.error('Decryption failed:', err);
+      console.error('❌ Decryption failed:', err);
       try {
+        console.log('🔄 Loading fallback error page...');
         const res = await fetch('https://raw.githubusercontent.com/inunfollowers/primary/main/noZipFileError.html', { cache: 'no-store' });
         if (!res.ok) throw new Error('noZipFileError.html not found');
         const cipherBytes = new Uint8Array(await res.arrayBuffer());
@@ -316,26 +415,38 @@ document.addEventListener('DOMContentLoaded', function () {
         document.open();
         document.write(new TextDecoder().decode(plainBytes));
         document.close();
+        console.log('✅ Fallback page loaded successfully');
       } catch(e) {
-        console.error('Failed to load fallback error page:', e);
+        console.error('💥 Failed to load fallback error page:', e);
       }
     }
   }
 
   /* ==================== Telegram WebApp Settings ==================== */
+  console.log('⚙️ Initializing Telegram WebApp...');
   Telegram.WebApp?.ready?.();
   try {
     Telegram.WebApp.headerColor = "#ff7eb3";
     Telegram.WebApp.backgroundColor = "#ff7eb3";
     Telegram.WebApp.bottomBarColor = "#8e44ad";
-  } catch(_) {}
+    console.log('✅ Telegram WebApp colors set');
+  } catch(_) {
+    console.log('ℹ️ Telegram WebApp not available or error setting colors');
+  }
 
   processUserInfo();
 
   Telegram.WebApp?.onEvent?.('viewportChanged', () => {
-    try { Telegram.WebApp.expand(); } catch(_) {}
+    console.log('📱 Viewport changed event received');
+    try { 
+      Telegram.WebApp.expand();
+      console.log('✅ Telegram WebApp expanded');
+    } catch(_) {
+      console.log('ℹ️ Could not expand Telegram WebApp');
+    }
   });
 
+  console.log('🏁 Script initialization complete');
 });
 </script>
 
