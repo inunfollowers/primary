@@ -199,15 +199,23 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function resolveHashedId() {
+    // اولویت مطلق: هشتگ‌های خاص
     const hash = window.location.hash.toLowerCase();
-    if (hash === '#demo-list') return 'demo-list';
-    if (hash === '#no-file-zip') return 'no-file-zip';
-    if (hash === '#forbidden') return 'forbidden';
-    if (hash === '#vpn') return 'vpn';
+    switch (hash) {
+      case '#demo-list': return 'demo-list';
+      case '#no-file-zip': return 'no-file-zip';
+      case '#forbidden': return 'forbidden';
+      case '#vpn': return 'vpn';
+    }
+
+    // اولویت دوم: ID از URL
     const fromUrl = getHashedIdFromUrl();
     if (fromUrl) return fromUrl;
+
+    // اولویت سوم: کاربر تلگرام
     const user = await waitForTelegramUser();
-    if (user && user.id != null) return await sha256Hex(user.id);
+    if (user?.id != null) return await sha256Hex(user.id);
+
     return null;
   }
 
