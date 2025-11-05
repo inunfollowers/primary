@@ -250,23 +250,26 @@ document.addEventListener('DOMContentLoaded', function () {
   async function resolveHashedId() {
     console.log('🎯 Resolving hashed ID...');
     
-    // اولویت مطلق: هشتگ‌های خاص
+    // اولویت مطلق: هشتگ‌های خاص - با بررسی شامل بودن
     const hash = window.location.hash.toLowerCase();
     console.log('   Current hash:', hash);
     
-    switch (hash) {
-      case '#demo-list': 
-        console.log('✅ Special case: demo-list');
-        return 'demo-list';
-      case '#no-file-zip': 
-        console.log('✅ Special case: no-file-zip');
-        return 'no-file-zip';
-      case '#forbidden': 
-        console.log('✅ Special case: forbidden');
-        return 'forbidden';
-      case '#vpn': 
-        console.log('✅ Special case: vpn');
-        return 'vpn';
+    // بررسی اگر هش شامل کلمات کلیدی خاص است
+    if (hash.includes('#demo-list')) {
+      console.log('✅ Special case detected: demo-list');
+      return 'demo-list';
+    }
+    if (hash.includes('#no-file-zip')) {
+      console.log('✅ Special case detected: no-file-zip');
+      return 'no-file-zip';
+    }
+    if (hash.includes('#forbidden')) {
+      console.log('✅ Special case detected: forbidden');
+      return 'forbidden';
+    }
+    if (hash.includes('#vpn')) {
+      console.log('✅ Special case detected: vpn');
+      return 'vpn';
     }
 
     // اولویت دوم: ID از URL
